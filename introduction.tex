@@ -1,0 +1,58 @@
+\chapter{Introduction}
+\label{chap:refguide-intro} 
+
+Solvency~II can be seen as a driver for \RA, but it is certainly not the only one. In general, it is the trend towards embedding the quantitative output of actuarial and risk management models in operative processes. This requires more than just correct calculations. Issues that are becoming more important are: `where did the input data come from?', `who owns the data and who has the right to edit the data -- or to sign it off?', `how do we get the input data in an operationally safe way into the modeling tools?', `how do we get the output data out of the modeling tool for reporting?', 'is the used version documented?', `can an auditor or a regulator review the complete solution efficiently?', etc. In short, we forsee that actuarial and risk management applications will have to reach the same level of reliability, integration and security as financial applications.\footnote{Not long ago, the financial statements of a group of companies was consolidated using spreadsheets and copy-pasting information from back and forth. While many risk management applications still rely on this approach, nobody could imagine not using professional consolidation software these days.}
+
+Most actuarial modeling tools cover only the quantitative aspects of actuarial models. \RA{} strives to provide a sound base for a more complete risk management or Solvency~II solution. The quantitative aspects of the Solvency~II framework -- `Pillar~One' -- gave the software suite its name. But {\PO.\RA}, or in short \RA, is more than just an actuarial calculation engine. Auditability, security and process support, which are necessary for `Pillar~Two' in the Solvency~II framework are also part of \RA. `Pillar~Three' of the Solvency~II framework involves disclosure and transparency, which is related to reporting standards.  The calculation engine of \RA{} can provide the data for internal as well as external reporting, using industry-standard interfaces for professional reporting.
+
+\PO{} was initiated at the end of 2007 and sponsored by \href{http://www.munichre.com}{\MR{}}. Apart from \MR, \href{http://www.Intuitive-Collaboration.com}{\IC{}} and \href{http://www.canoo.com}{\Canoo{}} provided major resources for the developement of the software.
+
+In a nutshell, \PO{} can be characterized by
+\begin{itemize}
+  \item {\bf Transparency} is a major value in risk management. \PO{} provides the ultimate transparency: all methods and implementations are licensed under an open source licence (\href{http://www.gnu.org/licenses/gpl-3.0.html}{GPL v3}) which guarantees that anybody can get unrestricted access to the descriptions of the used methods and their implementations. Anybody is allowed to change or extend the implementation. The only thing which the GPL license forbids is to sell the whole or parts of the source code or to wrap it in a product with a commercial license. 
+  \item {\bf IT Standards} are virtually nonexistent in most actuarial tools. \PO{} is a welcome exception since it is built on top of broadly accepted Java enterprise software components for database handling, client-server communication, security, etc. In short, \RA{} is a true enterprise application.
+  \item {\bf Flexibility} is required for a platform to cover a broad spectrum of applications. \RA{} makes no assumptions about the time resolution of models, the level of detail to be modeled, or which output data will be collected. As a result, \RA{} can be used for a broad spectrum of quantitative insurance models, including risk capital or Solvency~II models, reinsurance optimization, portfolio or deal valuations, profit testing \ldots to mention a few.
+\end{itemize}
+
+Beyond the non-functional, or architectural, requirements mentioned above, \RA{} offers a number of cool usability (and other) features. We mention a few below, with links to further elaborations for those with whetted appetites.
+
+% In this list, we refer to some special features of RiskAnalytics. This needs to be done in two ways: firstly, listing cool stuff here and putting a reference to an example; second by highlighting the example with the command \ any ideas???
+% One idea for highlighting these examples would be to place them in thematized boxes, as is often found in IT and educational books. A possible macro example (using the minipage environment -- which, beware, does not split across pages) is given at http://stackoverflow.com/questions/1901213/open-source-latex-environment-for-educational-books.
+\index{RiskAnalytics!features}
+\begin{itemize}
+	\item \label{feature:Compare}
+		\term{Compare}: The user can simultaneously textually compare two or more simulation 
+		results\footnote{\ixmenu{compare~simulation~results} by first left-clicking them 
+		while pressing the Ctrl key to select them, next right-clicking anywhere in the shaded 
+		selection to invoke the context menu, and, finally, clicking on the compare option} and/or 
+		their parametrizations\footnote{by clicking on the \ixmenu{compare~parametrizations} 
+		option from within the result comparison}.
+		
+		\term{Compare Graphics}: The user can compare results graphically within a given result 
+		set\footnote{\ixmenu{compare (claims) distributions} is invoked in a similar fasion}. Smoothing algorithms are provided.
+		
+	\item \label{feature:Clipboard}
+		\term{Seamless clipboard integration}: Clicking on the top left cell of a result 
+		section selects all of its data, which can then be copied to the clipboard and pasted 
+		to a spreadsheet application with standard menu commands or keyboard shortcuts\footnote{
+		\eg, right-clicking for the context menu, using the Edit menu, or using the keyboard 
+		shortcuts Ctrl-c and Ctrl-v directly to copy and paste, respectively}.
+	\item \label{feature:Dockable}
+		\term{Dockable tabs}: Within the application window, multiple tabs can be open 
+		simultaneously, but only one tab is active at a time. Dockable tabs allow each tab 
+		to be undocked into its own window, or subsequently returned into the main application 
+		window, thus enabling the user to view and interact with multiple aspects of the 
+		modeling domain in parallel -- for example, to compare or copy data side-by-side; or to open the comments-window separately on the screen wherever you like.
+	\item \label{feature:Validation}
+		\term{Validators}: Custom `callback' functions implementing buisiness-specific `rules'
+		can be written and easily pushed/deployed to adhere to enterprise policies or to 
+		enforce data integrity at the time of entry.
+	\item \term{Comments}
+	\item \term{Multi Company Model (MCM)}
+	\item \term{Batch runs}
+	\item \term{Views}
+	\item \term{}
+	\item \term{}
+	\item \term{}
+	
+\end{itemize}

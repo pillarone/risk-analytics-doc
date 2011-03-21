@@ -1,0 +1,382 @@
+\chapter{Introduction}
+\label{chap:devguide-introduction}
+
+This part of the \RA{} documentation is meant for software developers who want to change or
+extend business logic, or simply add new features to the \RA{} application. To develop code
+which is maintainable and fits well with the \PO{} framework, it helps to understand the
+basic concepts which are described in Chapter~\ref{chap:refguide-concepts}.
+
+Adopters of \RA{} are free to modify source code, e.g. to add features for their own or a
+client's use. \RA{} is released under the GPL license, and hence, anything which is
+compliant with this license is allowed.
+
+If you would like some of your changes to be included in an official release of \RA{},
+please get in touch with a core team member.%
+% todo: someone (other than bgi) decide if they like this comment:
+\footnote{Code contribution to an open source project is by necessity discretionary, in
+both directions: contributors should not reveal information that should remain private to
+their enterprise, such as information from (or about) their clients, while the core
+project team must exercise some degree of control to maintain the goals of the project,
+such as commonality or performance requirements.}
+
+
+\chapter{Development environment}
+\label{chap:devEnvironment}
+
+First you need the source code which can be downloaded from the \PO{} website,
+\url{www.pillarone.org}.  Apart from the business logic which is completely written by the
+core team and the community members, \RA{} is built on top of leading software frameworks.
+The most prominent one is Grails%
+	\footnote{Grails\index{Grails|textbf}
+		is the open-source web application framework based on Groovy\index{Groovy}.
+		See their \href{http://grails.codehaus.org/}{homepage} for more information.},
+which itself contains the Spring framework, Hibernate and ULC, to mention the most
+important ones.  You don't need to download and install these frameworks separately.
+The \RA{} source distribution contains the appropriate versions of these frameworks.
+
+To download the source distribution\ldots
+
+Developing with such a sizable software system is more than just editing files. Hence, we
+recommend that you set up an integrated development environment (IDE). The core team uses
+IntelliJ IDEA and consequently the source distribution contains the project files for
+setting up the complete \RA{} source code in IDEA. The project can also be set up in
+Netbeans or Eclipse.
+
+For source code versioning we use \href{http://git-scm.com/}{Git}. Anyone can obtain read
+access, by following the steps below.
+First you should configure your Git username and password for the project:
+
+\begin{itemize}
+	\item[]
+		\code{git config user.name "Your Name"}\\*
+		\code{git config user.email "your.email@email.com"}
+\end{itemize}
+
+Git usernames can also be configured globally, but (at least on Windows) this is not
+recognized when committing through IDEA.
+
+When the project is started for the first time, IDEA might complain that path variables are not set.
+They have to be set once globally and are necessary to allow for stable project files.
+If IDEA does not complain, they can be set at \term{File $\rightarrow$ Settings $\rightarrow$ Path variables}.
+
+\begin{itemize}
+	\item PILLARONE\_GRAILS: Should be set to the location where the modified Grails 1.2.0
+		version was checked out (see above)
+	\item USER\_HOME: Should be set to your user home direcotry (where the .grails folder is)
+\end{itemize}
+
+
+\chapter{Modularization}
+\label{chap:devguide-modularization}
+
+\RA{} is split up in different modules, currently core, application and business logic.
+As \RA{} is a Grails application, a module is actually a Grails plugin.
+
+For our own and modified public plugins we use our own Grails plugin repository, which is
+located at: \url{https://svn.intuitive-collaboration.com/GrailsPlugins/}
+
+Read only access does not require authentication, but a SVN account is required to release
+plugins into our repository.
+
+
+\chapter{Working on existing plugins}
+\label{chap:devguide-plugins}
+
+Our plugins are based on a modified version of Grails 1.2.0, which is also available from Git.
+\code{ gitaccess@svn.intuitive-collaboration.com:riskanalytics-grails.git
+}
+
+The project files of the plugins are already configured correctly to use this grails
+version, however you will need to set GRAILS\_HOME to the correct folder if you want to use
+grails commands on the CLI.
+
+The core and application plugins can be obtained from our Git repository:
+\begin{itemize}
+	\item[]
+		\code{git clone git://github.com/pillarone/risk-analytics-core.git}\\*
+		\code{git clone git://github.com/pillarone/risk-analytics-application.git}
+\end{itemize}
+
+
+Additional plugins are no longer checked into the repository, because we have our own plugin
+repository now.  Plugins are defined in application.properties and will be downloaded
+automatically.
+
+Changes to the plugin can be commited and pushed to \term{git} as usual. However it is only
+possible to change files inside the plugin scope. For example, the application plugin cannot
+change anything in \texttt{riskanalytics.core.*}.  If such a change is required, a new
+version of the core plugin must be released and then installed in the application plugin.
+
+\section{Releasing a plugin}
+
+At first the distribution location (Grails plugin repository to save the plugin) must be defined.
+The discovery location, which is used to download plugins, is already defined in \ixconffile{BuildConfig.groovy}.
+
+To avoid to accidently commit SVN credentials the distribution location should not be defined at the same place.
+Instead a \texttt{~/.grails/settings.groovy} file should be created and the following line added:
+
+\code{
+grails.plugin.repos.distribution.pillarone = \\*
+"https://username:password@svn.intuitive-collaboration.com/GrailsPlugins/"
+}
+
+Before releasing, the plugin version number has to be corrected in the file \texttt{RiskAnalytics*GrailsPlugin.groovy}.
+If everything is set up, the plugin can be released using the \texttt{release-plugin} ant target.\\
+
+It is probably a good idea to tag the Plugin release in git:
+\code{
+git tag -m `tagged plugin version x.y' `v.n.n'
+}
+
+\section{Running it all together}
+
+As the development is now split up between the different plugins, developing the UI means
+that there are only simple test models available and there is no UI for developing business
+logic.
+This should encourage to write test cases instead.
+However sometimes it is necessary to run for example a business logic model with the UI
+available. For this case, a `development runner' project is available from git.
+
+\code{
+git clone gitaccess@svn.intuitive-collaboration.com:riskanalytics-devrunner.git
+}\\
+
+The external dependencies required by core and application are already included.
+The location of the \RA{} plugins to be used can be configured in
+\ixconffile{BuildConfig.groovy}.
+That way it is possible to run and test a complete application, which uses the current
+plugin `Snapshots' contrary to the plugin projects which use only released plugin versions
+and usually only depend on the core plugin.
+
+However this project should only be used as `application runner' and NOT to edit files of
+other plugins!  All changes and running tests should be done in the individal plugin project.
+
+
+\chapter{Creating your own plugin}
+\label{chap:devguide-create-plugins}
+
+All grails plugins are based on a Grails 1.3.4. However due to a bug in the Groovy 1.7.4 compiler, we replaced it with
+Groovy 1.7.5. You should therefore use
+that version which can be obtained from:
+\code{
+gitaccess@svn.intuitive-collaboration.com:riskanalytics-grails.git
+}
+
+Make sure the environment variable \texttt{GRAILS\_HOME} points to the above mentioned
+grails and \texttt{PATH} includes \texttt{GRAILS\_HOME/bin}.
+Then simply run \code{grails create-plugin PluginName} to create a new plugin.
+
+\subsection{Define \PO{} repository}
+
+To be able to download from our plugin repository, add the following lines to
+\ixconffile{BuildConfig.groovy}:
+\begin{verbatim}
+grails.project.dependency.resolution = {
+    inherits "global" // inherit Grails' default dependencies
+    log "warn"
+
+    repositories {
+        grailsHome()
+        grailsCentral()
+    }
+
+    def myResolver = new URLResolver()
+    myResolver.addArtifactPattern "https://build.intuitive-collaboration.com/plugins/[artifact]/grails-[artifact]-[revision].[ext]"
+
+    resolver myResolver
+}
+\end{verbatim}
+
+Most plugins will need the risk-analytics-core plugin:
+\code{
+grails install-plugin risk-analytics-core
+}
+The core plugin and all its dependencies will then be downloaded and installed.
+Also the file YourPluginGrailsPlugin.groovy should be edited, to define name, version, dependencies and more.
+An example *GrailsPlugin.groovy and an example build.xml file can be obtained from the Core or Application plugin.
+
+It is also recommended to update the Config.groovy & DataSource.groovy files, because certain options should be set.
+The easiest way to do this is to look at the corresponding files in the core & application projects and take the necessary options from there.
+
+\section{Git Hints}
+
+\begin{itemize}
+	\item Working on a branch
+	\begin{itemize}
+		\item create the branch locally using \code{git branch --track 0.5.x remotes/origin/0.5.x}
+		\item switch the working branch using \code{git checkout 0.5.x}
+	\end{itemize}
+\end{itemize}
+
+\section{Environments}
+
+As Risk Analytics is a Grails application we also use Grails' support for different environments. The environment Risk Analytics runs in is defined at startup with the parameter \texttt{-Dgrails.env=environment-name}.
+We use the environments for the database connection settings (in grails-app/conf/DataSource.groovy) and several other application settings in grails-app/conf/Config.groovy.
+
+It is possible to add new environments by editing these files and copy-pasting existing environments. This is typically done when a new database product will be used.
+
+For more information see: \href{http://grails.org/doc/latest/guide/3. Configuration.html\#3.2 Environments}{http://grails.org/doc/latest/guide/3.~Configuration.html\#3.2~Environments}
+
+\section{User Management}
+
+The server version of RiskAnalytics includes a user management, which includes login, saving of user preferences and the user information is linked to modelling items.
+The user management is based on Spring Security and there are two pre-defined roles, ROLE\_USER who can use the application and ROLE\_ADMIN who can additionaly manage the users.
+
+New users can be added in the BootStrap of your application. An example of how to add new users can be found in the class CoreBootStrap in the core plugin.
+
+\chapter{Scalability}
+
+The principle behind stochastic simulations as applied in RiskAnalytics is to generate a large number of so called independent, identically distributed
+realizations of the future ('iteration') and then to statistically analyze the ensemble of all these iterations.
+
+The accuracy (confidence) of the results can be improved by increasing the number of iterations, i.e. the
+ensemble the statistical estimates are based on. Typically, asking for better accuracy of the results implies
+longer runtimes. This is not necessarily true if
+\begin{itemize}
+ \item a larger number of computing resources (CPU's) is available and
+ \item the software used to run the simulation is capable of distributing the computations to many CPU's.
+\end{itemize}
+
+Stochastic simulations are an ideal candidate to distribute the computations since independent iterations can
+be generated just as well on different CPU's.
+
+\section{Application Structurue Revisited}
+\label{sec:devguide-app-struct}
+The RiskAnalytics platform is split up into three modules:
+\begin{itemize}
+ \item core which provides a basic infrastructure such as data access and reporting services and for setting up
+    and running models;
+ \item application which, basically, contains the graphical user interface;
+ \item business logic.
+\end{itemize}
+
+The SimulationRunner is part of the core module and is the component from which the stochastic simulations are
+configured, started and run. The following basic steps are processed in a simulation run:
+\begin{itemize}
+ \item Pre-simulation actions
+  \begin{itemize}
+   \item Instantiating a model
+   \item Loading of input data
+  \end{itemize}
+ \item Simulation
+  \begin{itemize}
+   \item Computing the random scenarios (n iterations with m periods each)
+   \item Writing the raw simulation output to a file
+  \end{itemize}
+ \item Post-simulation actions \footnote{Up to RiskAnalytics 1.1 the raw simulation output was automatically written to the database
+       as part of the postsimulation actions. In view of eliminating the bottleneck of the data persistence layer to obtain a scalable
+       distributed solution this approach was changed: Now the raw simulation output is written to local files and only the statistics
+       output is written to the database. The raw simulation output can be loaded into the database on demand.}
+  \begin{itemize}
+   \item Loading data from file
+   \item Computing the statistics
+   \item Storing the statistics output in the database
+  \end{itemize}
+
+\end{itemize}
+
+The computational intensive and time consuming part of a simulation run clearly is the simulation itself. In order to achieve scalability it
+is sufficient to distribute the computation of the random scenarios. Here it is important to assure that all iterations remain stochastically
+independent. Furthermore it is important to obtain reproducibility independent of the computing grid configuration (e.g. number of nodes).
+\pagebreak
+
+\section{GridGain}
+
+Since 1.2 scalability is a standard feature of the platform. The application should scale on a single multi-core laptop
+as well as on a grid consisting of multiple computing resources. No additional deployment overhead is needed; once set-up
+and configured, the simulations are automatically  distributed.
+The framework used for distributing the computations is GridGain\footnote{For more information about GridGain check
+\href{http://www.gridgain.com}{www.gridgain.com}}.
+GridGain is open source, java-based hence multi-platform and allows simple deployment. It allows to be integrated smoothly
+into the existing platform with minimal intrusion. By using a threaded architecture, it scales well on a multi-core
+single machine and on multiple computing resources combined to a grid.
+
+\section{Implementation}
+In this section a short description of the implementation of the computing and data persistence part in the gridified RiskAnalytics
+application is given.
+
+\subsection{Computing}
+\label{sec:devguide-computing}
+As discussed in \ref{sec:devguide-app-struct} the Simulation Runner, used to start a stochastic simulation, consists of 3 steps. The "Simulation" step
+is computing the random scenarios during multiple iterations. These iterations are independet from each other and can therefore
+be run in parallel.
+In order to achieve this using the GridGain Framework, the following changes and additions to RiskAnalytics have been made:
+\begin{itemize}
+ \item The total number of iterations is split into blocks. Each block is allocated to a grid job which then processes the iterations.
+ \item A grid job is basically an execution unit which can be run on a grid node. Multiple grid jobs run in parallel.
+A grid job consists of a simulation configuration, a list of simulation blocks and the execution routine.
+The simulation configuration describes all runtime aspects e.g. numberOfIterations, numberOfPeriods, the parameterization, etc.
+A simulation block specifies the iterations to be processed and how to handle the random number generation.
+The execution routine creates and starts a Simulation Runner.\footnote{As of RA 1.2 the Simulation Runner executes just the pre-simulations
+actions and the simulation actions; the post-simulation actions are no longer part of the Simulation Runner and are called later (see \ref{sec:devguide-data}).}
+ \item There is actually one grid node embedded in the Riskanalytics application. This grid node is always active and acts as
+master node. The master node is responsible for creating jobs and distributing them to other grid nodes (slave nodes).
+These slave nodes process the iterations included in the assigned blocks and send the intermediate results back to the master node.
+The master node then also manages the data persistence (see \ref{sec:devguide-data}).
+ \item The number of created grid jobs per simulation run is chosen equal to the number of cpus (or cores) in a grid.
+\end{itemize}
+
+\subsection{Data persistence}
+\label{sec:devguide-data}
+Following changes and additions have been made to support the local file persistence:
+\begin{itemize}
+ \item The master node is continuously storing the received intermediate simulation results.
+ \item This raw data consisting of iteration meta information and simulated values is no longer automatically stored into a database
+but directly written in binary form into files.
+ \item As soon as all grid jobs have finished their simulation run, the reduce method of the master node is called. This method
+processes the statistical analysis of the raw data (post simulation process) and stores the statistical characteristics into a database.
+\end{itemize}
+
+\section{Configuration}
+A grid consists of several computing resources on which a distributed task can be executed. To allow this distributed
+computing, a considerable amount of communication and coordination between the computing resources is necessary.
+GridGain provides the necessary communication and coordination out-of-the-box, meaning no additional configuration effort
+is needed to add grid nodes to an existing grid. The communication is done via network broadcasting, so each grid node
+in the same subnet automatically joins the grid.
+
+
+As mentioned in \ref{sec:devguide-computing} there is already a grid node embedded in the RiskAnalytics application.
+When executing a simulation run, this master node is executing the application multi-threaded by considering all available cpu cores
+of its host system.
+If an additional grid node should join the grid make sure the host system is running in the same subnet as
+the Riskanalytics application system and follow these instructions to set up a GridGain node:
+\begin{enumerate}
+ \item Unzip \texttt{gridgain-3.0.0c-win.zip}
+ \item Set \texttt{GRIDGAIN\_HOME} environment variable to the path you unzipped (e.g. \texttt{\path{C:\gridgain-3.0.0c-win}})
+ \item Copy the Riskanalytics library \texttt{RiskAnalytics.jar} to \\ \texttt{\path{gridgain-3.0.0c-win\libs\ext}}
+ \item Adjust \texttt{\path{gridgain-3.0.0c-win\config\default-spring.xml}}\\
+Replace:
+\begin{lstlisting}
+         <!--
+        <property name="p2PLocalClassPathExclude">
+            <list>
+                <value>org.springframework.*</value>
+                <value>org.openspaces.*</value>
+                <value>org.hibernate.*</value>
+            </list>
+        </property>
+        -->
+\end{lstlisting}
+
+with
+\begin{lstlisting}
+         <property name="p2PLocalClassPathExclude">
+            <list>
+                <value>org.apache.commons.logging.*</value>
+                <value>org.slf4j.*</value>
+            </list>
+        </property>
+\end{lstlisting}
+
+\item Execute \path{gridgain-3.0.0c-win\bin\ggstart.bat}
+A successful start shows on the prompt:\\
+\texttt{>>> GridGain started OK}
+\item Start the Riskanalytics application. On the prompt of the gridgain node following message should be visible (as soon
+as the application has started): \\
+\texttt{>>> Node JOINED [nodeId8=..., addr=[...], CPUs=...]}\\
+\texttt{>>> Topology snapshot [nodes=2, CPUs=...]}
+
+\item When you start a simulation run with at least 2000 iterations (so at least 2 jobs are generated and can be distributed), you should be able to follow the log output of this simulation run
+on the GridGain prompt.
+
+\end{enumerate}

@@ -1,0 +1,73 @@
+%%
+%% Preamble -- sets the document class, loads required packages and defines their defaults and some 'global' constants
+%%
+\documentclass[10pt,english]{book}
+%\usepackage[latin1]{inputenc}% This is useful for catching some non-ascii characters when rich text was pasted into a TeX source file
+%\usepackage[T1]{fontenc}% produces poor PDF output!! % but useful for troubleshooting LaTeX Font Warnings from undefined font shapes
+\usepackage{amssymb,amsmath,amsfonts}
+% load color before hyperref to set link colors in the hyperref options
+% for the 'usenames' option, see e.g.:
+% http://en.wikibooks.org/wiki/LaTeX/Colors#The_68_standard_colors_known_to_dvips
+\usepackage[usenames,dvipsnames]{color}
+\definecolor{light-gray}{gray}{0.9}
+\definecolor{bgListing}{gray}{0.9}
+\definecolor{fgLob}{rgb}{0,0.36,0}
+\definecolor{fgCodeComment}{rgb}{0.133,0.545,0.133}
+\definecolor{fgCodeLiteral}{rgb}{0.627,0.126,0.941}
+% load hyperref before geometry with pdftex & no truedimen (see geometry package doc v4.2 2008-12-21, �10 known problems)
+% choose colors for different link types, using names above, either defined explicitly, or from the 'usenames' option
+\usepackage[hyperfootnotes=false,%
+            colorlinks=true,%
+            linkcolor=Blue,%
+            anchorcolor=Black,%
+            citecolor=MidnightBlue,%
+            filecolor=Sepia,%
+            menucolor=RoyalBlue,%
+            runcolor=BrickRed,%
+            urlcolor=Blue%
+           ]{hyperref}
+\usepackage[margin=2cm,paper=a5paper]{geometry} %\usepackage[margin=2cm,paper=a4paper]{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{xspace}
+\usepackage{subfig}
+%\usepackage{subfigure}
+%\usepackage[eng]{babel}
+%\usepackage{amsfonts}
+\usepackage{framed}
+\usepackage{makeidx}
+% todo(bgi): if the above isn't working for TeX4HT creation, perhaps try looking at lshort-base.tex & lshort.sty from the source for \cite{Oetiker.2009} in addition to \cite{Gurari.2004} & \cite{Polewczak.2008}
+%\usepackage{lastpage}
+\usepackage{ifthen}
+
+\setlength{\parindent}{0pt}
+%todo(bgi): set parindent to 0 also inside footnotes?
+
+% set default values for (code) listings
+\lstset{
+	numbers=left, numberstyle=\tiny, numbersep=10pt, stepnumber=5,
+	backgroundcolor=\color{bgListing},
+	tabsize=4,
+	rulecolor=,
+	language=Java,
+	basicstyle=\footnotesize\sffamily,%\scriptsize\footnotesize\small,%\ttfamily\sffamily
+	%upquote=true,
+	aboveskip={1.5\baselineskip},
+	columns=fullflexible,%fixed/flexible/fullflexible/spaceflexible
+	extendedchars=true,
+	breaklines=true,
+	prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	frame=single,
+	showtabs=false,
+	showspaces=false,
+	showstringspaces=false,
+	identifierstyle=\sffamily,%\ttfamily\sffamily
+	keywordstyle=\color[rgb]{0,0,1},
+	commentstyle=\color{fgCodeComment},
+	stringstyle=\color{fgCodeLiteral},
+	%todo:try out \textsf for all listing text!
+}
+
+% start indexing
+\makeindex

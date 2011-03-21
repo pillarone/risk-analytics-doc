@@ -1,0 +1,193 @@
+\chapter{Concepts}
+\label{chap:refguide-concepts}
+
+In order to understand the concepts of \PO{} \RA,
+it is necessary to get comfortable with the words that we use
+to denote various aspects in their context, \ie
+
+\begin{itemize}
+  \item \term{Model} contains all the risk drivers, applying them in a specific order by using a data driven workflow
+  \item \term{Components} are the building blocks of a model
+  \item \term{Packets} contain the information sent from component to component and persisted as results
+  \item \term{Wiring} describes the relations among the components of a model
+\end{itemize}
+
+as introduced in Section~\ref{sec:riskmodel} and
+
+\begin{itemize}
+  \item \term{Simulation}: executing a model with a specific parameterization collecting results as described in a result template
+  \item \term{Iteration}: one possible realization in a stochastic context, also referred to as an `iteration run'; one specific, actual realization in a deterministic context
+  \item \term{Period}: projection step; \ie~a calender based time interval, such as a business year
+  \item \term{Results}: Resultanalysis, graphically and numericalle by different graphics and \term{views}
+\end{itemize}
+
+as introduced in Section~\ref{sec:simulation}.
+
+Before entering into more details, let us give some definitions:
+
+\begin{itemize}
+  \item \term{Persistence}
+  \item \term{Parameterization}
+  \item \term{Result}
+  \item \term{Business Logic}
+  \item \term{Collection Mode}
+  \item \term{}
+  \item \term{}
+\end{itemize}
+
+
+\section{Risk Model}
+\label{sec:riskmodel}
+There are three different kinds of models:
+\begin{itemize}
+  \item deterministic models especially designed for life modelling
+  \item stochastic models with no time concept
+  \item stochastic models with a time concept
+\end{itemize}
+
+Examples are the models \term{Capital Eagle} or \term{\PODRA{}}.
+
+\subsection{Model}
+\subsection{Components} 
+\subsection{Packets} 
+
+\subsection{Wiring} 
+
+\section{Simulation}
+\label{sec:simulation}
+
+A \term{simulation} runs a \hyperref[sec:riskmodel]{\term{risk model}} a given number of times.
+Each of the single executions -- all together makeing up a simulation -- is an \term{iteration}.
+In other words, a simulation starts a number of iterations and works on the collected results.
+Every iteration runs the model for a given number of \term{periods}.
+
+Periods can most easily be thought of as business years (but they can be any regular, calendar-based time interval).
+Each period may have a different set of parameters.
+Periods have a natural sequence, and output from one period can be transferred as input to the next period. The number and length of periods is defined in the parameterization. If all periods are of equal length this may be defined in the model. \todo{different lengt?}{; if they are of different length ... }
+
+Schematically, for a simulation with $m$ iterations and a parameterization defining $n$ periods:
+
+\begin{tabular}{|cccccc|}
+\hline
+&&&&&\\
+\multicolumn{6}{|l|}{simulation}\\
+&&&&&\\
+\hspace{1cm}
+ &  &  period $1$ &  period $2$ & \ldots    & period $n$ \\
+ & iteration $1$  &  \ldots     &  \ldots     & \ldots    & \ldots     \\
+ &   $\vdots$     &  $\vdots$   &  $s_{ip}$   & $\vdots$  & $\vdots$   \\
+ & iteration $m$  &  \ldots     &  \ldots     & \ldots    & \ldots     \\
+&&&&&\\
+\hline
+\end{tabular}
+
+\subsection*{Simulation}
+
+In order to execute a simulation, the user has to select a risk model, a parameterization and a result template.
+
+\subsection*{Iteration}
+
+\todo{screen}{shot}
+
+\todo{deterministic models}{how to use them???}
+\todo{stochastic models}{how to use them???}
+
+\begin{itemize}
+  \item The number of iterations required depends upon the statistical key figures to be evaluated.
+        Generally speaking, more iterations are required for distributions with fatter tails, and/or evalutaions of higher/lower quantiles.
+  \item A simulation of a DeterministicModel is called \emph{calculation}. It contains one iteration only. It's results are deterministic and not stochastic.
+\end{itemize}
+
+\subsection*{Period}
+
+For each period, every component executes the following methods exactly once, after all information from its prerequisite components is available:
+\begin{itemize}
+  \item \code{doCalculation()} evaluates incoming information and parameters and prepares outgoing information
+  \item \code{publishResults()} sends the produced information to following components or collectors
+  \item \code{reset()} prepares the component for the next period
+\end{itemize}
+
+\subsection*{Results}
+
+The result is a set of {simulation, iteration, period, path, field, value}.
+
+\section{Component}
+\label{sec:component}
+
+Components are the \emph{building blocks} of models. Most of the business logic is kept in components. Components have typed
+interfaces which receive and send \emph{packets} from and to other components and parameters.
+
+Thinking of a model as a \emph{directed graph}, components are the \emph{nodes} in such a graph. An \emph{edge} links a sender
+interface to a receiver interface of another component.
+
+\subsection*{Advice}
+\begin{itemize}
+  \item Try to keep components simple; a component should do one thing, not many things. This makes it easier to test it and also increases the chances that it can be re-used. Better buiding two components running after one other than only one.
+  \item Before starting to implement any component, draw the directed graph with pencil and paper. Specify where specific information is required and produced. Once the directed graph can be mentally traversed, it is time to start coding.
+\end{itemize}
+
+\subsection*{Concept}
+\begin{itemize}
+  \item The method \code{doCalculation()} is executed once only per iteration and period. Therefore no loops are possible within a single component.
+  \item Execution is triggered by the framework: If all wired interfaces (properties of type PacketList starting with \code{in}) have received their information, \code{doCalculation()} is executed. Afterwards, packets to be sent to following components are available \code{in} the \code{out} properties.
+  \item Content of \code{in} and \code{out} properties is not shared between different iteration paths and periods. Once the framework has sent outgoing information to following components, the \code{in} and \code{out} property lists are cleared.
+\end{itemize}
+
+%NB:h4. 
+\subsection*{Implementation Details}
+\begin{itemize}
+  \item All components are derived from the class\\
+        \code{org.pillarone.riskanalytics.core.components.Component}
+  \item Use helper methods such as \code{isSenderWired(PacketList sender)} to check if a component will receive information in a specific model or \code{isReceiverWired(PacketList~receiver)} to check if a following component or a collector is wired to an out property.
+\end{itemize}
+
+\subsection{Conventions}
+\label{subsec:conventions}
+
+Conventions make a developer's life easier by reducing the amount of code to be written and increasing its readability.
+In \RA, conventions are used to generate the user interface and database scheme.
+
+\subsection*{Naming convention}
+Beside clean code and greater readability, naming conventions increase coding speed
+in modern IDEs (integrated development environments) which support code completion.
+
+A component may have several properties. Component property naming employs four prefixes:
+\begin{itemize}
+  \item \code{parm}: whenever a variable name starts with \code{parm}, it is displayed on the parameterisation user interface automatically. A \code{parm} property may have one of the following types: int, double, String, DateTime, enum.
+  \item \code{in}: all \code{in} variables are of type \code{PacketList}. Once they are wired they receive packets from other components.
+  \item \code{out}: all out variables are of type \code{PacketList} and can send packets to other components. It is displayed on the result template user interface and on the result page if the property was collected. The collection mode can be specified in the result template.
+  \item \code{sub}: a component may have subcomponents. Their name has to start with \code{sub}. They are helpful to provide building blocks and introduce a hierarchy.
+\end{itemize}
+
+\note{If a component is written in Java, variables starting with any of these prefixes need a public setter and getter method. In Groovy a variable declared with no access modifier generates a private field with public getter and setter (i.e.~a property). Therefore it is not necessary to write any getter or setter methods with default behaviour in Groovy.}
+
+\subsection*{Grouping of Components and Parameters in the GUI}
+The order of parameters, out channels and subcomponents within a component determines the order in
+the GUI.
+
+\RA{} comes with a powerful way of deriving a default user interface for all models, components and its
+parameters -- a model or component developer does not have to write any GUI code. Yet he can simply group the parameters.
+
+%<!--// todo: add a code snippet and three screenshots: parameter, result template, result page --> 
+
+
+\subsection{Composed Component}
+\label{subsec:composed}
+
+To prevent modelers from always having to start from scratch, the concept of \emph{composed components}
+enables a degree of re-use by allowing to define building blocks consisting of several components.
+Typical building blocks may be for example lines of business or a reinsurance program.
+\todo{A composed component is very similar to a model, except that it can't be executed.}{explain}
+The following three sections describe three different scenarios for composed components.
+\begin{itemize}
+  \item static building blocks containing a \emph{fixed number} of \emph{different} component types
+  \item dynamically composed components containing an \emph{arbitrary number} of \emph{equal} components. They are data-driven in the sense that the exact number of subcomponents is specified in the data and not in the model itself. Think of them as containers containing an arbitrary number of predefined subcomponents, wired according to specific rules. Examples: a reinurance program with an arbitrary number of contracts, an arbitrary number of lines of business or claims generators.
+  \item multiple calculation phase components. This concept is new and its API not yet stable.
+\end{itemize}
+
+\paragraph{Static Building Blocks}
+\label{par:statlego}
+
+Whenever several components are always used in the same manner or additional hierarchy levels would facilitate the
+understanding of a model, a \code{ComposedComponent} is the appropriate solution. Composed components may be nested.
+\todo{Furthermore a ComposedComponent may contain one or many DynamicComposedComponent.}{please explain}

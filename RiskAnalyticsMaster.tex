@@ -1,0 +1,43 @@
+\input{Preamble-book.tex}
+\input{Preamble-Macros.tex}
+
+\begin{document}
+%\selectlanguage{english}
+
+\frontmatter
+\input{RiskAnalytics-booktitle.tex}
+
+\mainmatter
+\setcounter{tocdepth}{1}
+\tableofcontents
+\label{ref:TODO}
+
+\part{User Guide}
+\input{introduction.tex}
+\input{gettingstarted.tex}
+\input{cli.tex}
+\input{podramodel.tex}
+\input{multicompanymodel.tex}
+\input{application.tex}
+
+\part{Reference Guide}
+\input{concepts.tex}
+\input{claims.tex}
+\input{dependencies.tex}
+\input{exposure.tex}
+\input{reinsurance.tex}
+\input{nlreserves.tex}
+\input{almgenerators.tex}
+\input{companies.tex}
+
+\part{Developer Guide}
+\input{developerguide.tex}
+\input{businesslogic.tex}
+\input{testing.tex}
+
+\label{LastPage}% remove if \usepackage{lastpage}
+
+\backmatter
+\input{backmatter.tex}
+
+\end{document}

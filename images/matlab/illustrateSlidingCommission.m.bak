@@ -1,0 +1,39 @@
+%%%%% produce figure to illustrate step function character of commission rate
+%%%%% for Sliding scale commission strategy
+
+
+x = [0:0.01:2];
+index1 = find(x==0.4);
+index2 = find(x==0.60);
+index3 = find(x==0.70);
+
+y1 = 0.3*ones(length(x(1:index1)));
+y2 = 0.2*ones(length(x(index1:index2)));
+y3 = 0.1*ones(length(x(index2:index3)));
+y4 = 0.05*ones(length(x(index3:end)));
+
+
+aS = 7;   %Achsen-stärke    
+lS = 7;   %Linien-stärke
+fS = 25;  %fontsize   
+    
+figure(1); clf;
+plot(x(1:index1),y1,'b'); hold on; 
+plot(x(index1:index2),y2,'b'); hold on;
+plot(x(index2:index3),y3,'b'); hold on;
+plot(x(index3:end),y4,'b'); hold on; 
+plot(0,0.3,'o'); hold on;
+plot(x(index1),0.3,'x'); hold on;
+plot(x(index1),0.2,'o'); hold on;
+plot(x(index2),0.2,'x'); hold on;
+plot(x(index2),0.1,'o'); hold on;
+plot(x(index3),0.1,'x'); hold on;
+plot(x(index3),0.05,'o'); hold on;
+axis([0,1.1,0,0.6]);
+xlabel('loss ratio l_{rate}');
+ylabel('commission ratio c_{rate}');
+titletext = sprintf('Initial provision 0.3 and jump discontinuities \{(0.4,0.2),(0.6,0.1),(0.7,0.05)\}');
+title(titletext)
+set(gca,'FontSize',fS); set(gca,'LineWidth',aS); set(get(gca,'title'),'Fontsize',fS);  
+set(get(gca,'xlabel'),'Fontsize',fS); set(get(gca,'ylabel'),'Fontsize',fS); 
+      

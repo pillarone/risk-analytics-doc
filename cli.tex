@@ -1,0 +1,40 @@
+\chapter{The command line}
+\label{chap:cli}
+
+\section{Overview}
+There is a way to run simulations without using the user interface. The command line application offers the same simulation settings as the UI and the results are saved to the same database, which means that the results
+can later be viewed in the application (if the command line is run with the same environment).
+
+\section{Starting the Command Line Interface (CLI)}
+\label{sec:cli_start}
+
+The command line application is located in the \filename{RiskAnalytics} subfolder of the
+installation directory. The general syntax is:
+\code{java [JAVA-OPTIONS] -jar org.pillarone.riskanalytics.core.cli.RunSimulation.jar [CLI-OPTIONS]}
+
+\subsection{JAVA-OPTIONS}
+
+The following Java options should be set:
+
+\begin{itemize}
+	\item \texttt{-Xmx1024m} Sets the maximum heap space to 1024MB. Depending on the simulation options, it should also run with less memory, but 1024M should be enough for everything.
+	\item \texttt{-XX:MaxPermSize=256M} Sets the PermGen memory size to 256m.
+	\item \texttt{-Dgrails.env=environment} Sets the grails environment within which the simulation is run. This mainly defines where the results are saved to.
+		Possible options are: \texttt{mysqlembedded}: Uses a mysql database which is started before, and stopped after the simulation. \texttt{mysql}: Uses a already running mysql instance (must run on localhost:3306, db: p1rat, user: p1rat, pw: p1rat). \texttt{standalone}: Uses an embedded derby database.
+\end{itemize}
+
+\subsection{CLI-OPTIONS}
+
+The CLI-OPTIONS define the simulation input parameters (the equivalent of the simulation configuration page)
+
+\begin{itemize}
+	\item \texttt{-parameterization $<$path$>$ \\ $<$path$>$} is the parameterization file which should be used for the simulation
+	\item \texttt{-resultConfiguration $<$path$>$ \\ $<$path$>$} is the result configuration file which should be used for the simulation. The model class must be the same as the parameterization file.
+	\item \texttt{-force} (optional) \\ By default the parameterization and the result template is not imported if one with the same name already exists. Use this option to force the import of the files.
+	\item \texttt{-iterations $<$number$>$} \\ The number of iterations to run.
+	\item \texttt{-name $<$name$>$} \\ The simulation name.
+	\item \texttt{-comment $<$comment$>$} (optional) \\ A comment for the simulation run.
+	\item \texttt{-seed $<$number$>$} (optional) \\ The random number generator seed to use for this simulation.
+	\item \texttt{[-dboutput $\mid$ -fileoutput $<$file$>$ $\mid$ -nooutput]} \\ One of these options must be given. \texttt{-dboutput} saves the results to the DB defined by the given grails environment. \texttt{-fileoutput} saves the results to a file and \texttt{-nooutput} does not save any results at all.
+	
+\end{itemize}

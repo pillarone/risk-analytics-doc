@@ -1,0 +1,181 @@
+\input{Preamble-book.tex}
+\input{Preamble-Macros.tex}
+
+\makeindex
+
+\begin{document}
+
+%\tableofcontents
+
+\chapter*{Documentation Guidelines for \PO}
+\today
+
+\section{Prerequisites}
+
+You need a \TeX{}/\LaTeX{} distribution, and an editor for \TeX{}. For Windows we're currenly using:
+\begin{itemize}
+  \item \LaTeX{} distribution: \href{http://miktex.org/}{MiKTeX} (Note: MiKTeX automatically downoads
+	  any required packages such as, e.g., \href{http://www.cse.ohio-state.edu/~gurari/TeX4ht/}{TeX4HT}
+	  for producing HTML+image \& XML+MathML output formats)
+  \item Editor: \href{http://www.texniccenter.org/}{TeXnicCenter}
+\end{itemize}
+although there are many other possibilities (see, e.g., section
+\href{http://www.csun.edu/~hcmth008/mathml/acc_tutorial.html#x1-120006.3}{6.3} of \href{http://www.csun.edu/~hcmth008/mathml/acc_tutorial.pdf}{Polewczak's {TeX4HT} Tutorial}).
+
+\section{Practical Documentation Rules}
+
+We are using a few macros for some standard types of text such as Java/Groovy code, terms, notes, caveats, etc. See Section \ref{sec:ourmac} below.
+
+We agree to observe the following rules:
+\begin{itemize}
+  \item Have one master \TeX{} file that contains all the inclusion commands; only use \code{{\textbackslash}input} for including other \TeX{} sources, and only from the master file.
+  \item We have set up some macros for common use. Please use these whenever appropriate. We will expand or refine these as needed. If you find yourself regularly using your own LaTeX macros, let us know!
+  \item \code{{\textbackslash}label} names must be `typed', eg: sec, subsec, subsubsec, fig, lst for, respectively, sections, subsections, sub-subsections, figures and listings. For example, a section called 'documentation' should be \TeX ed as: \code{{\textbackslash}label\{sec:documentation\}}.
+  \item Say in a comment why you are including each package.
+  \item \ldots
+\end{itemize}
+%The intention is to have some sensible TeX coding conventions which also allow some flexibility --- for example, the production of PDF, HTML or XML output formats with minimal fuss.
+
+\section{Our Setup}
+
+TeXnicCenter has a project file (\code{.tcp}) to specify the main \TeX{} file when a project contains more than one. Sample \code{tcp} files are included in version control for the \code{RiskAnalyticsMaster.tex} file (combined \RA{} Guides) and the \code{documentation.tex} file (Documentor's Guide). Both are currently configured for PDF output, but may be changed for HTML or XML output (using TeX4HT) if one re-organizes the heirarchical structure slightly (by splitting chapters, for example)\todo{revise \TeX{} sources to re-harmonize with TeX4HT/XML output}. This is because \code{book} \code{documentstyle}s allow a level 0 \code{{\textbackslash}chapter}, whereas \code{article}s start with level 1 \code{{\textbackslash}section}s.
+
+\section{Document Structure Conventions}
+
+We have split the \TeX{} preamble and macro sections into separate files. A typical `master' \TeX{} file would then look like Listing \ref{lst:structbook}.
+So typically you would write your contribution as a \code{{\textbackslash}section} in an existing or new \TeX{} file and it would be included in the `master' \TeX{} file with an \code{{\textbackslash}input} statement.
+
+\begin{framed}
+\begin{lstlisting}[label=lst:structbook, caption={Document Structure Sample: book documentstyle}, language=TeX]
+\input{Preamble-book.tex}
+\input{Preamble-Macros.tex}
+
+\makeindex
+\begin{document}
+\input{RiskAnalytics-booktitle.tex}
+\tableofcontents
+
+\chapter{chapter 1 title}
+\input{introduction.tex}     % => \section{Introduction} ...
+\input{gettingstarted.tex}
+\input{concepts.tex}
+\input{testing.tex}
+
+\chapter{chapter 2 title}
+...
+
+\end{document}
+\end{lstlisting}
+\end{framed}
+
+
+\section{Our Macros}
+\label{sec:ourmac}
+
+Listing \ref{lst:macros} illustrates the use of our macros, which are defined in the file \code{Preamble-Macros.tex}.
+
+\begin{framed}
+\begin{lstlisting}[label=lst:macros, caption={Our Macros}, language=TeX]
+
+This is \term{a term} I am introducing.
+
+This is \code{inline code}, such as a Java class name.
+
+This may need changing: \todo{IST}{SOLL}.
+
+\note{This is a note --- that is, one or more full
+sentences relating observations or remarks that the
+reader should take note of.}
+
+\end{lstlisting}
+\end{framed}
+
+\note{\code{{\textbackslash}todo} takes two arguments:
+(1) the text to display,
+(2) the text that goes in a footnote.}
+
+\note{Use the {\textbackslash}todo macro for notes of things that need to get
+done when you want the comment to be visible in the document.}
+
+\caveat{The \code{{\textbackslash}note} and \code{{\textbackslash}caveat} commands should start with
+a newline (\code{\textbackslash\textbackslash}) in paragraph mode,
+since they may be framed in a box in HTML document formats.}
+
+%\begin{lstlisting}[label=LaTeX~one-liners, backgroundcolor=\color{ListingBackground}]
+%
+%This (really) is a code block:
+%
+% \code{inline monospace}
+% \term{terms (currently displayed in bold)}
+% \emph{empasis (currently displayed in italic style)}
+% 
+% \chapter{header level 0 (to show up in the TOC, for book documentstyles)}
+% 
+% \section{header level 1 (to show up in the TOC)}
+% 
+% \subsection{header level 2 (to show up in the TOC)}
+% 
+% \subsubsection{header level 3 (to show up in the TOC)}
+% 
+% \paragraph*{header level 4}
+% 
+% \subparagraph*{header level 5}
+% 
+% \note{This is a note (on a new line)}
+% 
+% \caveat{This is a warning (on a new line)}
+%
+%\end{lstlisting}
+
+\section{Some Typesetting Rules}
+\label{sec:typesetting}
+
+In order to improve the appearance of the documentation we follow some general typsetting rules that are used by all major publishers.
+
+\subsection{Abbreviations containing a dot}
+\label{subsec:abbreviationsWithDot}
+Abbreviations that contain a dot have to be taken special care of as \LaTeX{} interprets a dot (as well as explanation mark and question mark) always as the end of a sencence and thus add extra whitespace after it (inter-sentence whitespace). This of course is an unwanted behavior in an abbreviation. Dots {\em within} an abbreviation must always be followed by a protected small whitespace of half inter-word length (\code{\textbackslash ,}). Dots {\em at the end} of an abbreviation usually must be followed by an inter-word whitespace. If the abbreviation is followed by a comma, colon or semicolon no space must be added, thus it generally makes sence to define a new command for it in order to manage this behavior.
+
+The command that produces `\ie' is called \code{\textbackslash ie} and is defined as 
+\begin{verbatim}
+\newcommand{\ie}{i.\,e.\@\xspace}
+\end{verbatim}
+The \code{\textbackslash xspace} command adds the correct whitespace at the end. Other already implemented abbreviations:
+\begin{table}[h]
+	\centering
+		\begin{tabular}{ll}
+ 			\code{\textbackslash ie}  & \ie \\
+ 			\code{\textbackslash eg}  & \eg \\
+ 			\code{\textbackslash Eg}  & \Eg \\
+ 			\code{\textbackslash etc} & \etc\\
+ 			\code{\textbackslash ff}  & \ff
+		\end{tabular}
+	\caption{Abbreviations containing a dot}
+	\label{tab:Abbreviations}
+\end{table}
+
+\subsection{Abbreviations following a number}
+\label{subsec:abbreviationsAfterNumber}
+
+If a number is followed by an abbreviation \eg `\$'  or `\ff' only a small whitespace (\code{\textbackslash ,}) is used between the number and the abbreviation resulting in `page~100\,\ff' instead of `page~100\ff' or `page~100 \ff'. The correct code is:
+\begin{verbatim}
+page~100\,\ff
+\end{verbatim}
+
+\subsection{Referencing}
+\label{subsec:referencing}
+
+When referencing pages, chapters, figures, tables \etc it is important to add a protected inter-word whitespace (\code{\textbackslash\~}) before the reference, otherwise there a linebreak could occur right before the respective number. In a reference the keyword are always written wstarting with a capital letter expect when referencing pages ore lines. Thus the correct refference in the \TeX{} file for this section would be
+\begin{verbatim}
+see Section~\ref{subsec:abbrebiations}
+\end{verbatim}
+Note:
+\begin{itemize}
+\item A reference is {\em never} used without a keyword like `line' or `Section'.\\
+			Exception: Equation/Formulae are set in round brackets without a key word.
+\item Keywords are never abbreviated: Use `Figure' instead of `Fig.', `page' instead of `p.', \etc
+\item Subsections, Subsubsections \etc are refert to as `Section' \eg `see Section~5.2.1'
+\end{itemize}
+
+
+\end{document}

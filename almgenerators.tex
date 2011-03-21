@@ -1,0 +1,12 @@
+\chapter{ALM generators}
+\label{chap:ALMGenerators} 
+Asset libility mismatch (ALM) risk is an important part of the insurer's set of risks. The models for technical insurance risks are modeled on a very granular level. To model the ALM risk, it is necessary to incorporate an economic scenario generator (ESG). The outcome, an ALM risk random distribution, can be put in \RA{} using the \ixpcc{ALM generators} component. The component is dynamic, so that several ALM generators can be used in a model.
+
+The parametrization of \ixpcc{ALM generators} is similar to that of attritional claims. 
+
+Usually, \ixpcc{ALM generators} are of type Absolute, so the generated value of the modifiable distribution is stored as the ALM end of period value. The initial volume is stored in the appropriate parameter. Additional types may be introduced to scale the distribution by Absolute Result, Relative Value or Relative Result.
+
+
+%\section{ALM generator}
+%\label{sec:ALMgenerator}
+

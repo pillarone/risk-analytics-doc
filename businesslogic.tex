@@ -1,0 +1,460 @@
+\chapter{Writing business logic: Components}
+
+The following examples can all be found within in the \RA{} source code repository:
+
+\url{https://svn.intuitive-collaboration.com/RiskAnalytics/trunk/RiskAnalyticsPC/src/groovy/org/pillarone/riskanalytics/domain/examples/groovy}.
+
+\section{Step-by-Step Component Example}
+\label{sec:comp-eg-steps}
+
+We create a component providing a premium value to other components. The premium will be the product of number of policies and the price per policy parameter.
+
+\begin{itemize}
+  \item Create a new Groovy or Java class in the corresponding package. (Line 1, 6) Domain classes can be found in \code{src/groovy/org.pillarone.riskanalytics.domain}
+  \item The class has to extend \code{org.pillarone.riskanalytics.core.components.Component} (Line 6)
+  \item The class has two parameters \code{parmNumberOfPolicy} and \code{parmPricePerPolicy} (Line 8, 9) The order in which the parameters are defined is also the order how they will be displayed in the UI. If parameters are inherited from superclasses, the parameters of the superclass are displayed first.
+  \item The class has an output channel \code{outPremium} (Line 11) in order to send premium information to other components.
+  \item Premium has to be calculated (Line 14), wrapped in a packet and added to the output channel (Line 15). Once \code{doCalculation()} has finished, the framework will send this premium packet to following components being wired to \code{PremiumCalculation.outPremium}.
+\end{itemize}
+
+\begin{lstlisting}[label=lst:premcalc]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.components.Component
+import org.pillarone.riskanalytics.core.packets.PacketList
+
+class PremiumCalculation extends Component {
+
+  double parmNumberOfPolicy
+  double parmPricePerPolicy
+
+  PacketList<PremiumPacket> outPremium = new PacketList<PremiumPacket>(PremiumPacket)
+
+  void doCalculation() {
+      double premium = parmNumberOfPolicy * parmPricePerPolicy
+      outPremium << new PremiumPacket(value: premium)
+    }
+}\end{lstlisting}
+
+Let's say we want another component providing index information which influences the price per policy. In order to cover this use case we write a component with extended functionality:
+
+\begin{itemize}
+  \item Add an additional input channel \code{inIndex} (Line 7)
+  \item Adjust the premium calculation: build the product of all received indices (Line 14 - 15) and adjust the price per policy accordingly (Line 14)
+\end{itemize}
+
+
+\begin{lstlisting}[label=lst:premcalwi]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.packets.PacketList
+
+class PremiumCalculationWithIndex extends PremiumCalculation{
+
+  PacketList<IndexPacket> inIndex = new PacketList<IndexPacket>(IndexPacket)
+
+  void doCalculation() {
+      double level = 1.0
+      for (IndexPacket idx in inIndex) {
+          level *= idx.value
+      }
+      double pricePerPolicy = parmPricePerPolicy * level
+      double premium = parmNumberOfPolicy * pricePerPolicy
+      outPremium << new PremiumPacket(value: premium)
+    }
+}\end{lstlisting}
+
+For the sake of completeness, the following listing contains the \code{IndexPacket} and \code{PremiumPacket} classes. Both classes are derived from \code{SingleValuePacket} having a value property.
+\begin{lstlisting}[label=lst:premindex]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.packets.SingleValuePacket
+
+class IndexPacket extends SingleValuePacket {
+}
+
+
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.packets.SingleValuePacket
+
+class PremiumPacket extends SingleValuePacket {
+}
+\end{lstlisting}
+
+
+
+\section{Step-by-Step Example of ComposedComponent}
+
+We create a component composed of a frequency and claims size generator.
+
+\begin{itemize}
+  \item Create a new Groovy class in the corresponding package (Line 1, 2). Domain classes can be found in \code{src/groovy/org.pillarone.riskanalytics.domain}
+    \\ \caveat{Composed components have to be defined in a Groovy class, as wiring would not work with a Java class in the current implementation.}
+  \item The class has to extend (see Line 9):
+    \\ \code{org.pillarone.riskanalytics.core.components.ComposedComponent}
+  \item The class has two sub-components \code{subIndexProvider} and \code{subPremiumCalculation}. Make sure all sub-components name start with \code{sub}! Components not starting with sub will not be displayed in any of the user interfaces. (Line 11, 12)
+  \item The class has an output channel \code{outPremium} (Line 14) in order to send premium to other components such as claims generators or reinsurance contracts.
+%  \item Note that sub-components have to be instantiated in the constructor and not in the declaration! (Line 7, 8)
+%        \todo{}{check if the above statement is still correct}
+  \item As this composed component does not have any input channels, we have to define which component is executed first in \code{doCalculation()} (Line 17).
+    \\ \caveat{As composed components contain no business logic by itself, it is not necessary to implement \code{doCalculation()}. The only exception are composed components without any (wired) in channels. Similar to the starting components concept in a model, \code{doCalculation()} is required for triggering. If any input channel is wired, \code{ComposedComponent.doCalculation()} has to be used!}
+  \item Each composed component has to implement the \code{abstract wire()} method. Wiring between the sub-components is done similar to the wiring in models using \code{WireCategory}. (Line 21-23). As sub-components are nested we have to make sure that the information provided or required outside the composed component is replicated. This is done with the so called \code{PortReplicatorCategory} (Line 24-26).
+    \\ \caveat{Using the \code{PortReplicatorCategory} the properties on the left and right side have to be either both \code{in} or both \code{out} properties, whereas for \code{WireCategory} the left side property has to be an \code{in} and the right side an \code{out} property.}
+\end{itemize}
+
+\begin{lstlisting}[label=lst:compcomp]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.components.ComposedComponent
+import org.pillarone.riskanalytics.core.packets.PacketList
+import org.pillarone.riskanalytics.core.wiring.WiringUtils
+import org.pillarone.riskanalytics.core.wiring.WireCategory
+import org.pillarone.riskanalytics.core.wiring.PortReplicatorCategory
+
+class IndexedPremium extends ComposedComponent {
+    
+    IndexProvider subIndexProvider = new IndexProvider()
+    PremiumCalculationWithIndex subPremiumCalculation = new PremiumCalculationWithIndex()
+    
+    PacketList<PremiumPacket> outPremium = new PacketList<PremiumPacket>(PremiumPacket)
+
+    protected void doCalculation() {
+        subIndexProvider.start()
+    }
+
+    void wire() {
+        WiringUtils.use(WireCategory) {
+            subPremiumCalculation.inIndex = subIndexProvider.outIndex
+        }
+        WiringUtils.use(PortReplicatorCategory) {
+            this.outPremium = subPremiumCalculation.outPremium
+        }
+    }
+}\end{lstlisting}
+
+In order to model a 'global' and a line specific inflation, an 
+in channel accepting an additional external index is required.
+\begin{itemize}
+  \item The class has an input channel \code{inIndex} (Line 10)
+  \item As \code{inIndex} is wired to the second sub component of the workflow,
+   the implementation of \code{doCalculation()} in the super class is required 
+   and therfore not overwritten.\\
+   \note{The method \code{isReceiverWired(inIndex)} (Line 13), which is 
+   	implemented in the base class \code{Component}, returns true if any 
+   	\code{out} property of another component is connected to \code{inIndex}. 
+   	Therefore, it is not mandatory to wire all channels.}
+  \item Finally, it is necessary to provide the index information to the
+    index provider component using the \GroovyClosure{true}%
+    \footnote{A Groovy \term{\code{closure}}
+		  is an object declared within matching curly brackets containing a code block, 
+		  optional argument declarations and, implicitly, a \code{call()} method. 
+		  When and how many times this method is called (and, as a result, the contained
+		  code block gets executed) depends on the context within which the closure 
+		  is declared. See~\cite{GroovyClosures}, particularly 
+		  the \href{http://groovy.codehaus.org/Closures+-+Formal+Definition}{Formal}
+		  and \href{http://groovy.codehaus.org/Closures+-+Informal+Guide}{Informal}
+		  Guide pages for more information.}
+    \code{PortReplicatorCategory} to wire them 
+    (Lines~\ref{lst:compfcg:closureStart}--\ref{lst:compfcg:closureEnd}).%
+\end{itemize}
+
+\lstset{escapeinside={@*(}{)*@}}
+\begin{lstlisting}[label=lst:compfcg]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.packets.PacketList
+import org.pillarone.riskanalytics.core.wiring.PortReplicatorCategory
+import org.pillarone.riskanalytics.core.wiring.WiringUtils
+import org.pillarone.riskanalytics.core.wiring.ITransmitter
+
+class AdvancedIndexedPremium extends IndexedPremium {
+
+    PacketList<IndexPacket> inIndex = new PacketList<IndexPacket>(IndexPacket)
+
+    protected void doCalculation() {
+        if (isReceiverWired(inIndex)) {
+            // corresponds to super.super.doCalculation() which is not possible
+            for (ITransmitter transmitter : allInputReplicationTransmitter) {
+                transmitter.transmit()
+            }
+        }
+        subIndexProvider.start()
+    }
+
+    void wire() {
+        super.wire()
+        if (isReceiverWired(inIndex)) {
+            WiringUtils.use(PortReplicatorCategory) { @*(\label{lst:compfcg:closureStart})*@
+                subPremiumCalculation.inIndex = this.inIndex // code within closure
+            }                                         @*(\label{lst:compfcg:closureEnd})*@
+        }
+    }
+}\end{lstlisting}
+
+\section{Arbitrary Number of Equal Components}
+\label{par:mulequcom}
+
+Composed components consist of a variable number of subcomponents, each of the same type.
+The number of subcomponents is defined in the parameterization.
+\todo{According the available records in a database}{clarify the english!}
+the same number of sub-components are instantiated.
+
+\subsection*{Concept}
+\label{subpar:dyncompcomp}
+
+\begin{itemize}
+  \item A dynamically composed component is similar to a composed component, in the sense
+        that it contains components, but also different, in the sense that it contains a
+        variable number of components of a specific type. The type of these components has
+        to be defined in the function 
+        \code{abstract Component getDefaultSubComponent()}
+  \item The \code{wire()} and \code{doCalculation()} methods follow exactly the same concepts as for a composed component.
+  \item The abstract class \code{DynamicComposedComponent} handles adding, removing, naming and other checks for all derived classes. The components are administered using a private list of component called \code{componentList}.
+  \item This concept enables a data driven modelling. The \PODRA{} model actually contains nine void containers (underwriting segments, claims generators, reserve generators, dependencies, event generators, segments, reinsurance, ALM generators and structures).
+  \item Models using dynamically composed components typically include several filter components for allocation. As an example the reinsurance program and all its reinsurance contracts will receive all claim and underwriting packets. Not all of them will be treated by every contract. As the wiring is fixed and cannot be optimized, it is necessary to filter packets. Therefore as a drawback of the higher flexibility a lower performance has to be accepted.
+  \item \todo{The higher flexibility increases the potential of parameterization errors}{This is not part of the concept but a warning.}.
+\end{itemize}
+
+\subsection*{Step-by-step example}
+\label{subpar:dcc-eg-steps}
+
+We create a dynamically composed component containing reinsurance contracts.\todo{}{(sku): add an easier example}
+
+\begin{itemize}
+  \item Create a new Groovy class in the corresponding package (Line 1, 2). Domain classes can be found in \texttt{src/groovy/org.pillarone.riskanalytics.domain}
+  \item Composed components have to be defined in a Groovy class as wiring would not work with a Java class in the current implementation.
+  \item The class has to extend
+    \\ \code{org.pillarone.riskanalytics.core.components.DynamicComposedComponent} (Line 2)
+  \item The \code{DynamicPremiumCalculation} has an arbitrary number of \code{PremiumCalculation} components. Their default instantiation is defined in \code{getDefaultSubComponent()}. The method is called whenever an application user right clicks on the dynamic premium calculation and adds a new premium calculation component.
+%  \item Finally it is necessary to define the default name of a new component (Line 12-14).
+\end{itemize}
+\begin{lstlisting}[label=lst:dcompcomp]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.components.DynamicComposedComponent
+import org.pillarone.riskanalytics.core.components.Component
+import org.pillarone.riskanalytics.core.packets.PacketList
+
+class DynamicPremiumCalculation extends DynamicComposedComponent {
+    
+    PacketList<IndexPacket> inIndex = new PacketList<IndexPacket>(IndexPacket)
+    PacketList<PremiumPacket> outPremium = new PacketList<PremiumPacket>(PremiumPacket)
+    
+    void wire() {
+        replicateInChannels this, 'inIndex'
+        replicateOutChannels this, 'outPremium'
+    }
+
+    Component createDefaultSubComponent() {
+        return new PremiumCalculation()
+    }
+}
+\end{lstlisting}
+
+\section{Filtering and Allocation}
+\label{par:filteralloc}
+
+\todo{Whenever a reallocation is needed, loops become unavoidable in the model graph.}{Provide example here.}
+There are specific composed components containing components being executed in different phases.
+
+The concept and implementation is relatively new. The API is not yet stable.
+The current implementation allows two phases.
+It is used to reallocate ceded and net claims and underwriting information to
+lines of business in order to display resulting gross, ceded and net figures in one place.
+
+An example implementation is ConfigurableLob.  The components 
+\begin{itemize}
+  \item \code{MultipleCalculationPhaseComposedComponent}
+  \item \code{MultiPhaseDynamicComposedComponent}
+\end{itemize}
+can be found in the package \code{org.pillarone.riskanalytics.core.components}.
+
+\section{Different Behaviors}
+\label{subsec:diffbehav}
+
+In order to provide a preferably small and well structured set of components combined with a high user flexibility, component parameters may be defined in an exchangable strategy\todo{}{provide example}. A strategy may consist of an arbitrary number of parameters or containing even a specific implementation. In order to implement flexible behavior several classes are required:
+\begin{itemize}
+	\item an interface extending \code{IParameterObject} and common methods needed for all behaviors. This interface is then used in the component as type of the parameter and for accessing different functionality of a behavior.
+	\item a class per behavior implementing the interface mentioned before
+	\item a type class extending \code{AbstractParameterObjectClassifier} containing a list of all available behaviors
+	\item components containing a strategy parameter have to be adjusted accordingly
+\end{itemize}
+As a use case for a strategy different index calibrations should be supported. As a consequence all strategies of the example will need to provide an index. This component producing the \code{IndexPacket} has to correctly handle the different use cases. In order to easily access methods available in all strategies an interface is required:
+\begin{lstlisting}[label=lst:strategyinterface]
+package org.pillarone.riskanalytics.domain.examples.groovy;
+
+import org.pillarone.riskanalytics.core.parameterization.IParameterObject;
+
+public interface IIndex extends IParameterObject {
+
+    double getIndex();
+}
+\end{lstlisting}
+
+The implementation for this behavior is trivial as the strategy keeps only the parameters and does not contain any index transformation logic. \code{getType()} (Line 7) and \code{getParameters()} (Line 11) are methods of the \code{IParameterObject} interface. It's up to the developer to split up implementation code between component and strategy class. Reinsurance contracts might be an interesting example. Contract strategies contain the specific contract logic and the components the common implementation.
+\begin{lstlisting}[label=lst:strategyimplementation]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+class RelativeIndexStrategy implements IIndex {
+
+    double changeIndex
+
+    Object getType() {
+        IndexType.RELATIVEPRIORPERIOD
+    }
+
+    Map getParameters() {
+        return ['changeIndex': changeIndex]
+    }
+
+    double getIndex() {
+        return changeIndex
+    }
+}
+\end{lstlisting}
+
+The type class contains all available strategies as a static type including the default parameters for each strategy. Variable names should not contain any special characters like underscores. The user interface will provide all strategies in the combobox being part of the static list \code{all}. All the other methods are required \eg for im-/export and the UI.
+
+\begin{lstlisting}[label=lst:strategytypes]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.parameterization.AbstractParameterObjectClassifier
+import org.pillarone.riskanalytics.core.parameterization.IParameterObjectClassifier
+import org.pillarone.riskanalytics.core.parameterization.IParameterObject
+
+class IndexType extends AbstractParameterObjectClassifier {
+
+    public static final IndexType ABSOLUTE = new IndexType("absolute", "ABSOLUTE", ["index": 1d])
+    public static final IndexType RELATIVEPRIORPERIOD = new IndexType("relative prior period", "RELATIVEPRIORPERIOD", ["changeIndex": 0d])
+
+    public static final all = [ABSOLUTE, RELATIVEPRIORPERIOD]
+
+    protected static Map types = [:]
+    static {
+        IndexType.all.each {
+            IndexType.types[it.toString()] = it
+        }
+    }
+
+    private IndexType(String displayName, String typeName, Map parameters) {
+        super(displayName, typeName, parameters)
+    }
+
+    public static IndexType valueOf(String type) {
+        types[type]
+    }
+
+    public List<IParameterObjectClassifier> getClassifiers() {
+        return all
+    }
+
+    public IParameterObject getParameterObject(Map parameters) {
+        return IndexType.getStrategy(this, parameters)
+    }
+
+    static IIndex getStrategy(IndexType type, Map parameters) {
+        IIndex index
+        switch (type) {
+            case IndexType.ABSOLUTE:
+                index = new AbsoluteIndexStrategy(index: parameters['index'])
+                break
+            case IndexType.RELATIVEPRIORPERIOD:
+                index = new RelativeIndexStrategy(changeIndex: parameters['changeIndex'])
+                break
+        }
+        return index
+    }
+}
+\end{lstlisting}
+
+The implementing component can query the parameter for the used strategy (Line 20, 23) and the index value. To keep the prior period index a member variable is added (Line 14). This member variable has to be reset for every iteration (Line 29). Explanations on the scope concept is available in the next section.
+
+\begin{lstlisting}[label=lst:flexibleindexprovider]
+package org.pillarone.riskanalytics.domain.examples.groovy
+
+import org.pillarone.riskanalytics.core.components.Component
+import org.pillarone.riskanalytics.core.packets.PacketList
+import org.pillarone.riskanalytics.core.simulation.engine.PeriodScope
+
+class FlexibleIndexProvider extends Component {
+
+    PeriodScope periodScope
+
+    IIndex parmIndex = IndexType.getStrategy(IndexType.ABSOLUTE, ['index': 1d])
+    PacketList<IndexPacket> outIndex = new PacketList<IndexPacket>(IndexPacket)
+
+    double priorIndex = 1d;
+
+    protected void doCalculation() {
+        if (periodScope.getCurrentPeriod() == 0) {
+            initIteration()
+        }
+        if (parmIndex.getType().equals(IndexType.ABSOLUTE)) {
+            outIndex << new IndexPacket(value: parmIndex.getIndex())
+        }
+        else if (parmIndex.getType().equals(IndexType.RELATIVEPRIORPERIOD)) {
+            outIndex << new IndexPacket(value: parmIndex.getIndex() * priorIndex)
+        }
+        priorIndex = outIndex[0].value
+    }
+
+    private void initIteration() {
+        priorIndex = 1d
+    }
+}
+\end{lstlisting}
+
+\section{Accessing External Information}
+\label{subsec:extinfo}
+
+By default a component is unaware of the simulation context. If business logic is depending on specific dates context information can be injected. There exist three different, nested scopes:
+\begin{itemize}
+	\item \code{SimulationScope} provides information being valid throughout the whole simulation such as the number of iterations, model, parameter dao, result configuration, output strategy (file/database) and the \code{IterationScope}.
+	\item \code{IterationScope} provides information being valid throughout a single iteration such as the current iteration number, number of periods, period stores and the \code{PeriodScope}.
+	\item \code{PeriodScope} provides information being valid for a single period such as the current period. If a model is based on exact dates specific methods are available in order to get the current and next period start date.
+\end{itemize}
+The injection of information is done by simply adding a property of the required scope to a component. Java components will need according getter and setter methods additionally.
+
+\section{Period Store}
+\label{subsec:peristor}
+
+A \code{PeriodStore} is used whenever a \code{Component} needs a memory in order to access data of former periods or prepare data that the \code{Component} itself will need in future periods. The content may be any kind of objects \eg packets being sent out in future periods. Period stores are cleared after an iteration. Period stores are injected and governed by the framework. \todo{The component itself can only read and write elements to it}{What is `only' refering to? Does it mean, no modifying or deleting?}. Index handling is done by the framework. Elements are accessed with a relative index \eg elements of the current period will be accessed with index 0, previous with -1. If a component is written in Java \code{getPeriodStore()} and \code{setPeriodStore(PeriodStore periodStore)} have to be implemented.
+
+
+\section{Packet}
+\label{subsec:packet}
+
+\begin{itemize}
+  \item Packets are type safe objects sent from a source component to a target component using a channel.
+  \item A packet may contain any kind and number of objects.
+  \item For convenience a packet implementation should overwrite \code{String toString()}. It makes debugging much easier.
+  \item When is an implementation of the following methods required?
+  \begin{itemize}
+    \item equals
+    \item hashCode
+    \item compareTo
+  \end{itemize}
+  TODO: provide answer.
+  \item Content modification (Copy/not copy transmitter)\\
+  TODO: explain
+  
+\end{itemize}
+
+\subsection*{Business Logic in Packets}
+Generally packets should be kept lean. \todo{However there are cases where it is useful including business logic in them.}{}
+
+\subsection*{Storing and Displaying Packets}
+There are two base classes allowing to persist and display results: \code{SingleValuePacket} and \code{MultiValuePacket}.
+
+\begin{itemize}
+  \item For \code{SingleValuePacket}, the value property is displayed in the result view. It's name can be configured, by overwriting \code{String getValueLabel()}.
+  \item For \code{MultiValuePacket}, all numeric properties are displayed in the result view according their order in the packet class.
+	Derived classes should override the method \code{getValuesToSave()} in order to limit displayed properties.
+\end{itemize}
+
+\note{If a packet class is implemented in Java, getters and setters have to be written. Use IDE refactoring features to
+do this.}
+
+\subsection*{Packet Pooling for Performance Optimization}
+TODO: Implementation still missing.

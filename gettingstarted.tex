@@ -1,0 +1,99 @@
+\chapter{Getting Started}
+\label{chap:refguide-getstart}
+
+Following the instructions in this chapter gets you from a to z within a short time. But only from little a to little z -- the remaining chapters cover the A to Z for \RA. To stick with the illustration, \RA{} knows many different font types, even more than openly available. In this manual, however, we are able to cover only a few. Please get in touch for more details about more fonts, i.e.~how to use \RA{} in a variety of environments such as solvency and pricing, life and non-life, direct and reinsurance, one- or multi-period models:  \href{mailto:contact@pillarone.org}{contact@pillarone.org}
+
+\RA{} comes in two flavors: A stand-alone version which can be installed on a laptop or PC and a server version which is required for an enterprise solution. Since \PO{} is based on Java technology, it runs on Windows, Unix/linux and MacOS X. In the client-server version, the client can run a different OS than the server. 
+
+Laptops have become fairly powerful, but their disks are significantly slower than those on servers. Hence, we recommend the standalone version for evaluation, for development and for anybody who works more or less alone on a modelling project or has no access to a server infrastructure, \eg~consultants on the road.
+
+If you just want to have a first glimps at \RA, then you can also play with the client-server version on our test environment on \href{http://pillarone.org/pillarone/try-it-online}{pillarone.org/pillarone/try-it-online}.\footnote{Be aware that this is a test environment; we may restart the server, clean the database and restrict the number of users or the number of iterations per user.}
+
+\section{Installing the standalone version}
+\label{sec:refguide-install-standalone}
+
+The standalone version is suitable to be installed on a laptop or desktop computer with at least 1 GB of RAM and several GB of harddisk space -- needed for handling the results of your simulations properly including all details as per your specification. It comes in an absolutely self-contained installer and, apart from the typical client-server components, it is identical to the client-server version. 
+
+The following steps describe how a standalone version can be installed. 
+
+\begin{enumerate}
+	\item Download the latest version from \href{http://pillarone.org/products/modelling}{pillarone.org}.\\ 
+		\note{If you have an earlier version of \RA{} installed, 
+			you will need to update (uninstall and reinstall) some plugins\ldots If, however, you will no longer need the parameters and results from the earlier installation, you might want to simply and completely uninstall the earlier installation and rightafter install the new version.}
+	\item Install
+\end{enumerate}
+
+\subsection{Database environments}
+
+In the standard setup, \PO \RA{}comes with an already up and running database. No customization needed. Just use it. 
+
+However, if you want to use another database, the following gives a first introduction: By default there is support for two different embedded databases: \term{mysql} (recommended) and \term{derby}. Which one will be used depends on the script used to start risk analytics.
+These databases are started and stopped together with RiskAnalytics, which means that it is not possible to access the database externally when the application is closed.
+
+If required it is also possible to run the application with an installed MySQL database (version 5.1 or newer is required).
+The database must be accessible at \texttt{localhost:3306} (3306 being the standard port). A database called \texttt{p1rat} must be created as well as user with name and password \texttt{p1rat}
+with the necessary privileges for the before mentioned table.
+
+The database and the user can be setup with the following commands:
+
+\code{
+create database p1rat;\\
+create user 'p1rat'@'localhost' identified by 'p1rat';\\
+grant all on table p1rat.* to 'p1rat'@'localhost';\\
+grant file on *.* to 'p1rat'@'localhost';
+}
+
+This would be sufficient to use \RA{} with a standalone mysql, however for acceptable performance a script which will setup partitioning and indices should be executed.
+It can be downloaded at https://svn.intuitive-collaboration.com/RiskAnalytics/trunk/RiskAnalytics/src/java/mysql.sql
+
+The database is now ready for Risk Analytics. To use this database with Risk Analytics it is necessary to edit the start script RunRiskAnalyticsMySql.cmd
+and replace \texttt{-Dgrails.env=mysqlembedded} with \texttt{-Dgrails.env=mysql}
+
+\subsection{Reset the database}
+
+To discard all changed data including results just remove the database directory in the pillarone temporary directory, which is \texttt{\~{}/.pillarone} by default, but can be changed during the installation process.
+If not using the embedded mysql, but an installed one, just re-run the script used to initialize the database.
+
+\subsection{Accessing results directly} 
+
+If you want to access the results directly they are saved in the table \texttt{single\_value\_result}. Only mysql can be accessed from outside the application (because derby runs in the same JVM).
+Keep in mind that when you want to access the results from the embedded mysql database (which runs on port 3307), \RA{} must be running. 
+
+\section{Installing the server version}
+\label{sec:refguide-install-server}
+
+This will give you a much more powerful set-up, but we recommend that you do this only if you have ample experience in dealing with server based installations or if you have a test server at your disposition.
+
+Prerequisits: 
+\begin{itemize}
+	\item A servlet container, \eg~Tomcat. No need for a fully fledged middleware.
+	\item A database, \eg~mysql. Note that you may have to edit the datasource 
+		information in the file \ixconffile{DataSource.groovy}%
+		\footnote{Groovy\index{Groovy|textbf} 
+			is an open-source scripting language based on Java.
+			See their \href{http://groovy.codehaus.org/}{homepage} 
+			or \cite{GroovyIA07} for more information.}.
+\end{itemize}
+
+
+\section{Your first simulation}
+\label{sec:firstSimulation}
+
+Start \RA{} by either opening the sandbox model from our server or the already installed version (as explained above). The releases include some demo models and we will use one of them now to verify that the installation is properly working. In the left pane, expand the \PODRA{} model and you should see the three subitems: \menu{Parameters}, \menu{Result templates} and \menu{Results}. 
+
+\todo{Screenshot}{of the application as it opens}
+
+Open the parameters section, right-click on a parameterization that you want to base your simulation on, and then select \menu{run simulation}. This opens the simulation tab and sets the parametrization from which you launched this view. You now want either to keep the suggested result template or make your own choice. For the first test run, entering a value between $100$ and $1000$ in the number of iterations will be an appropriate choice before clicking on \menu{Run}.
+
+\todo{Screenshot}{of the simulation page}
+
+Now lets have a look at the result section. Open the result of the most recent simulation. There are many ways to look at the data: tables, graphics, comparison of results. You will find out more on your personal excursion through your first simulation.
+
+\todo{Screenshot}{result analysis context menu, one or two examples}
+
+\section{A mini result analysis: MRA}
+\label{sec:miniResultAnaylsis}
+
+\todo{If you want to have a look at the tiniest -- still meaningful -- model possible, we got something for you: \term{MRA}. Consisting of hard-wired elements such as: one underwriting segment, one claim generator for attritional claims and one proportional reinsurance contract.}{We need such a model and description} 
+
+bls bls blup

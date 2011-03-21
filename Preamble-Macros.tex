@@ -1,0 +1,134 @@
+%%
+%% Text-style Macros -- defines commands for common styles, strings & indexing
+%%
+\newcommand{\str}[1]{\textsf{#1}}
+\newcommand{\term}[1]{\textbf{#1}}% conceptual term: boldface (todo: when introduced)
+\newcommand{\code}[1]{\textnormal{\textsf{#1}}}
+\newcommand{\menu}[1]{\textnormal{\textsf{#1}}}
+\newcommand{\todo}[2]{\emph{#1}\footnote{TODO: #2}}
+\newcommand{\note}[1]{\emph{\textbf{Note:} #1}}
+\newcommand{\example}[1]{{\textbf{Example:} #1}}
+\newcommand{\caveat}[1]{\textbf{Caveat:} #1}
+\newcommand{\filename}[1]{\textsf{#1}}
+\newcommand{\squot}[1]{`{#1}'}
+\newcommand{\dquot}[1]{``{#1}''}
+\newcommand{\tightitemize}[1]{\setlength{\itemsep}{#1}\setlength{\parskip}{0pt}\setlength{\parsep}{0pt}}
+\newcommand{\givecredit}[1]{\textit{Source}: #1}
+%\newcommand{\note}[1]{\begin{framed}\emph{\textbf{Note:} #1}\end{framed}}
+%\newcommand{\caveat}[1]{\begin{framed}\textbf{Caveat:} #1\end{framed}}
+%TODO(caveat): put in a yellow box with increased R & L margins and a triangle "caution" icon to the left, inside the box
+
+%%
+%% Indexing Macros (proposed convention: indexing commands start with 'ix')
+%%
+\newcommand{\ixent}[1]{% Organizations, entities
+  \textnormal{#1}%
+  \index{#1@\textnormal{#1}}%
+}
+% person
+% source: http://latex.silmaril.ie/formattinginformation/chapter9.html#macnest
+% e.g.: \person{John Smith} displays `John Smith' but is indexed as `Smith, John'
+\newcommand{\ixperson}[1]{%
+  #1\reindex #1\sentinel%
+}
+\def\reindex #1 #2\sentinel{\index{#2, #1}}
+%% 
+\newcommand{\ixconffile}[1]{%
+  \textsf{#1}%
+  \index{RiskAnalytics!configuration files!#1@\textsf{#1}}%
+}
+\newcommand{\ixparmfile}[1]{%
+  \filename{#1}%
+  \index{RiskAnalytics!parameterization files!#1@\filename{#1}}%
+}
+\newcommand{\ixpcc}[1]{% Components of a parametrization: [[Dynamic] Composed] Component Containers visible in the GUI parametrization treeview
+  \filename{#1}%
+  \index{RiskAnalytics!parameterization components!#1@\filename{#1}}%
+}
+\newcommand{\ixmenu}[1]{%
+  \textsf{#1}%
+  \index{RiskAnalytics!menu commands!#1@\textsf{#1}}%
+}
+\newcommand{\ixpkg}[1]{%
+  \textsf{#1}%
+  \index{RiskAnalytics!packages!#1@\textsf{#1}}%
+}
+\newcommand{\ixmeth}[1]{%
+  \textsf{#1}%
+  \index{RiskAnalytics!methods!#1@\textsf{#1}}%
+}
+\newcommand{\ixclass}[1]{%
+  \textsf{#1}%
+  \index{RiskAnalytics!classes!#1@\textsf{#1}}%
+}
+\newcommand{\ixclasstype}[1]{%
+  \textsf{#1}%
+  \index{RiskAnalytics!static types!#1@\textsf{#1}}%
+}
+\newcommand{\ixlob}[1]{%
+  \textsf{\color{fgLob}{#1}}%
+  \index{model parameter examples!lines of business!#1@\textsf{\color{fgLob}{#1}}}%
+}
+
+
+
+% general indexing macro for any word with a given parent but with no special formatting
+% param 1 could be, e.g., 'RiskAnalytics!external libraries!' and param 2 could be 'SSJ'
+% or param 1 could be '' and param 2 could be 'Swiss Solveny Test'
+\newcommand{\ix}[2]{%
+  \index{#1#2@#2}%
+  #2% here the text is regurgitated
+}
+% macro for `see' index entries; note that param 2 uses `relative' path, ignoring parents
+\newcommand{\ixsee}[2]{% note: nothing is displayed
+  \index{#1|see{#2}}%
+}
+\ixsee{RiskAnalytics!classes!of objects}{\emph{under} static types}%
+\ixsee{RiskAnalytics!models!PODRA}{PODRA~model}%
+
+%%
+%% Strings
+%%
+%% insurance
+%\newcommand{\SolvencyII}{Solvency~II{}}% currently unused!
+\newcommand{\SST}{SST{}\index{SST|see{Swiss~Solvency~Test}}}
+\newcommand{\sst}{\ix{}{Swiss~Solvency~Test}}% to index the a location without displaying any text
+%% mathematics
+%% numerics
+%\newcommand{\FFT}{FFT\index{FFT|see{Fast~Fourier~Transform}}}
+%\newcommand{\fft}{\ix{}{Fast~Fourier~Transform}}
+%% software
+\newcommand{\RiskAnalytics}{\texttt{RiskAnalytics}{}}
+\newcommand{\riskanalytics}{\RiskAnalytics}
+\newcommand{\RA}{\RiskAnalytics}
+\newcommand{\PillarOne}{\texttt{PillarOne}{}}
+\newcommand{\pillarone}{\PillarOne}
+\newcommand{\PO}{\PillarOne}
+\newcommand{\PORA}{\PillarOne~\RA}
+\newcommand{\PODRA}{Podra{}\index{PODRA~model}}
+% Java: display, reference & index
+% format, link & index the word Java when it denotes the computer language
+\newcommand{\Java}{\href{Java}{http://java.sun.com/}\index{Java}}
+% format & index the word Groovy when it denotes the computer scripting language
+\newcommand{\Groovy}{Groovy{}% no special formatting yet for 'Groovy' (aside from name capitalization)
+ \index{Groovy}}
+\newcommand{\GroovyClosure}[1]{closure% no special formatting yet for 'closure'
+ \ifthenelse{\equal{#1}{true}}{%
+ \index{Groovy!closure|textbf}}{%
+ \index{Groovy!closure}}}
+%% files (commonly mentioned)
+\newcommand{\ConfigGroovy}{\ixconffile{Config.groovy}}
+\newcommand{\AppProps}{\ixconffile{application.properties}}
+%% entities/organizations to display, index and hyperlink (in the index)
+\newcommand{\MR}{Munich~Re{}\index{MunichRe@\textbf{\href{http://www.munichre.com}{Munich~Re}}}}
+\newcommand{\IC}{Intuitive~Collaboration{}\index{Intuitive~Collaboration@\textbf{\href{http://www.intuitive-collaboration.com}{Intuitive~Collaboration}}}}
+\newcommand{\Canoo}{Canoo{}\index{Canoo@\textbf{\href{http://www.canoo.com}{Canoo}}}}
+\newcommand{\FinMa}{FinMa{}\index{FinMa@\textbf{\href{http://www.finma.ch/}{FinMa}}}}
+\newcommand{\FINMA}{FINMA{}\index{FinMa@\textbf{\href{http://www.finma.ch/}{FinMa}}}}
+
+\newcommand{\ie}{i.\,e.\@\xspace}
+\newcommand{\eg}{e.\,g.\@\xspace}
+\newcommand{\Eg}{E.\,g.\@\xspace}
+\newcommand{\etc}{etc.\@\xspace}
+\newcommand{\ff}{ff.\@\xspace}
+\newcommand{\cf}{cf.\@\xspace}

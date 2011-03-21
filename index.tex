@@ -1,0 +1,81 @@
+%%
+%% Preamble
+%%
+%\documentclass[11pt]{amsart}
+%\documentclass[11pt,a4,english]{amsbook}
+%\documentclass[11pt,a4,english]{article}
+\documentclass[11pt,a4,english]{book}
+
+%\usepackage[eng]{babel}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{color}
+%\usepackage{graphicx}
+%\usepackage{hyperref}
+\usepackage{graphicx,subfig,hyperref} 
+
+\lstset{language=Java}
+\definecolor{light-gray}{gray}{0.9}
+\definecolor{ListingBackground}{gray}{0.9}
+%?? set pagestyle with packages: article, book ??
+%\pagestyle{empty}
+\setlength{\parindent}{0pt}
+
+%%
+%% Text-style Macros (to be reviewed)
+%%
+\newcommand{\term}[1]{\textbf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\todo}[2]{\emph{#1}\footnote{TODO: #2}}
+
+\makeindex
+\begin{document}
+
+%%
+%% Top Matter
+%%
+
+\begin{titlepage}
+%\begin{minipage}
+\title{\includegraphics{images/logo.png}\\[0.2cm]
+%\begin{flushright}{\textsc{Risk Management meets Open Source}}\end{flushright}\\[0cm]
+\textcolor{light-gray}{\rule{\linewidth}{1pt}}\\[1cm]
+PillarOne RiskAnalytics\\[1cm]}
+\author{Ben Ginsberg, Dierk K\"{o}nig, Stefan Kunz, Markus Stricker}
+\date{}
+\maketitle
+
+\begin{flushleft}
+{\small{{\bfseries Version}: null\\[1cm]
+
+\emph{Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.}\\[1cm]
+
+Initiated and sponsered by Munich Re}}
+\end{flushleft}
+
+\tableofcontents
+
+\end{titlepage}
+%\end{minipage}
+
+%\pagebreak
+%%
+%% Sections
+%%
+\chapter{Reference Guide}
+
+\input{introduction.tex}
+\input{gettingstarted.tex}
+\input{concepts.tex}
+\input{testing.tex}
+\input{documentation.tex}
+
+\chapter{Developer Guide}
+
+TODO: this chapter needs to be written!
+
+\chapter{User Guide}
+
+TODO: this chapter needs to be written!
+
+\end{document}

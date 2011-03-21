@@ -1,0 +1,107 @@
+\chapter{The application}
+\label{chap:riskAnalyticsApplication}
+
+\section{Input Parameters}
+\label{sec:inputParameters}
+
+\todo{to open them}{td}
+\todo{to edit them}{td}
+
+\subsection{Versions}
+\label{subsec:parameterVersions}
+
+A parametrization can be in different states: editable or locked; valid or invalid. If a result is based (depending) on a (valid!) parametrization, this parameterization is no longer editable but locked. This can be seen by a small icon of a lock.  Unless the result is removed, the parameters which were used to produce this result stay locked. This is important to guarantee that the results are reproducable and auditable. Nevertheless, you may want to create different versions of the input parameters before running any simulation. Often users start with a base or a planing scenario and then derive for example a high interest rate scenario or a different reinsurance program.
+
+\note{In such a context many people use the term scenario interchangably with parametrization. This stems from the fact that for business people the input parameters capture operational options or scenarios: What happens if the interest rates increase or, how does a different reinsurance program affect the risk capital, etc.{}?}
+
+Most of the parameters in such derived parametrizations are left identical to the original parametrization and it would be cumbersome to enter or load them again. \RA{} offers a convenience function that lets you explicitly create a new version of a parametrization, \ie making a copy of a parametrization. Independent of whether the original parametrization was locked or not, the copy will be editable.
+%\begin{figure}
+%	\centering
+%		\includegraphics{images/Qsicon_Work_To_Do.png}
+%	\caption{Creating a new version of a parametrization}
+%	\label{fig:newParamVersion}
+%\end{figure}
+\todo{graphic}{graphic}
+
+
+
+\section{Defining outputs}
+\label{sec:riskAnalyticsResultTemplates}
+
+A model does not define itself which output variables are collected during a simulation run and then stored for subsequent analysis or reporting. Different users or even the same user in different situations may have different requirements. With a new model or model version the users often start by collecting a lot of output variables because they want to get a better feel for the model and verify that it performs as expected. Later on, for the operational use of the model, the actuaries may get more technical key figures collected and the business people more of the financial key figures. In principle, you could collect always all available output variables. People who are building models in Excel are used to this mode. For Monte Carlo simulation models this gets very quickly unwieldy. More importantly, the output would not be tailored to the user of the output: An actuary, a business analyst, a portfolio manager, etc.
+
+Result templates are used to define which output variables are collected during a simulation run and at which granularity. Hence, they are the means to tailor the output to the users. 
+
+The different strategies for collecting output data are:
+\begin{itemize}
+	\item foo bar
+\end{itemize}
+
+\todo{to open them}{td}
+\todo{to edit them}{td}
+
+\subsection{Versions}
+\label{subsec:resultTemplateVersions}
+
+The version behaviour of result templates is analogue to the one for parametrizations.
+A result template can be in two states: editable or locked. The latter happens if a result depends on this result template.  Unless the result is removed, the result template, which was used to produce this (dependent) result, stays locked. This is important to guarantee that the results are reproducable and auditable. Nevertheless, you may want to create different versions of a result template before running any simulation. The typical use case for this is that a power user defines the templates for less experienced users, or users who are less familiar with the model.
+
+If you want to derive a result template from another one because you want to leave large sections of the settings identical to the original result template, then it would be cumbersome to enter or load them again. \RA{} offers a convenience function that lets you explicitly create a new version of a result template, \ie copy it. Independent of whether the original result template was locked or not, the copy will be editable.
+%\begin{figure}
+%	\centering
+%		\includegraphics{images/Qsicon_Work_To_Do.png}
+%	\caption{Creating a new version of a result template}
+%	\label{fig:newResultTemplateVersion}
+%\end{figure}
+\todo{graphic}{graphic}
+
+
+
+\section{Running calculations / simulations}
+\label{sec:riskAnalyticsSimulation}
+
+\todo{complete section}{needs to be done!}
+There are two kinds of models: Deterministic calculation models and Monte Carlo simulation models. Both are supported by \RA. The common parameters are described here and the ones which are different (in the two worlds) are described in the following subsections.
+
+common inputs here
+
+name
+
+comment
+
+parametrization
+
+%\begin{figure}
+%	\centering
+%		\includegraphics{images/Qsicon_Work_To_Do.png}
+%	\caption{Executing deterministic calculations and Monte Carlo simulations}
+%	\label{fig:simPage}
+%\end{figure}
+\todo{graphic}{graphic}
+
+
+\subsection{Deterministic calculations}
+\label{subsec:deterministicCalculations}
+
+\todo{complete section}{needs to be done!}
+no seed, no number of iterations
+
+
+\subsection{Monte Carlo simulations}
+\label{subsec:simulations}
+
+seed optional
+
+number of iterations
+
+
+\section{Results}
+\label{sec:riskAnalyticsResults}
+
+The main interface to a result can be opened via the context menu in the left pane  
+
+screenshot
+
+
+
+where do we put `working with tabs'?

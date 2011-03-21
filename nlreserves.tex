@@ -1,0 +1,40 @@
+\chapter{Modelling non-life reserves}
+\label{chap:nl-reserves}
+After successfully setting up a model for premium risks modelling the reserve risks is certainly important. Reserve generators are accessible similar to claims generators \eg within the \PODRA{} model there exists a Dynamic Composed Component Reserve Generators. By selecting add in the context menu of Reserve Generators a reserve generator can be added. It consists of a descriptive name and
+\begin{itemize}
+	\item Initial Reserves
+	\item Reserves Model
+	\item Reserve Distribution
+	\item Period Payment Portion
+\end{itemize}
+explained in the following sections.
+
+We distinguish between two different methods, 
+\begin{itemize}
+	\item Calendar Year Method
+	\item Pay-Out Pattern Method
+\end{itemize}
+
+The Calendar Year Method is derived from standard reserving principles. A calendar year starts with knowing about a reserve portfolio consisting of real liabilities and the initial reserve representing their estimated volume. We aim in tracing the risk during one period or calendar year. \note{The following can be equally well applied to a model using a quarter or monthly period length.}  Within one calendar year reserve loss payments are made and and the outgoing reserve is set. Deviations of the sum of reserve loss payments and outgoing reserves from the initial reserves may be called risk. So we generate the mentioned sum of payments and outgoing reserves as a random variable. The initial reserve of the next period or next calendar year can be set to the outgoing reserve of the current. Pay-out ratios are fixed and can be set for reserves and first year losses seperately.
+
+The Pay-Out Pattern Method is derived from the observed pay-out patterns. Depending on the pay-out pattern each loss is allocated to the model periods. The reserves can be set as the sum of all future loss payments of the preceding periods. 
+
+
+\section{Calendar Year Method}
+\label{sec:cal-year-method}
+\subsection{Initial Reserves}
+The \textbf{Initial Reserves} of the calendar year are currently handeled within the reserve generator component. They are not tracked by an individual component like the Underwriting Information in the claims generators. Therefore the parameter initial reserves is used. 
+
+\subsection{Reserves Model}
+There exist three types of the reserve model, depending on the usage of the initial reserves value. They are \textbf{Absolute}, \textbf{Initial Reserves} and \textbf{Prior Period}. All of them having a modifyable reserve distribution. The type absolute defines the result of the reserve distribution as an absolute value of paid plus reserved. Using initial reserves scales (multiplies) the result of the reserve distribution by the initial reserve. And the Prior Period method scales the reserve distribution with the outgoing reserve of the prior period when available resp. the initial reserve in the first period.
+
+\subsection{Reserve Distribution}
+Please refer to Subsection~\ref{subsec:ClaimsModel} for details on modifyable reserve distributions.
+
+\subsection{Period Payment Portion}
+The Period Payment Portion gives the option to split the generated value for the sum of paid and reserved to these values. It is the relative share of the payment in the recent period.
+
+\section{Pay-out pattern method}
+\label{sec:payout-pattern}
+
+The Pay-out pattern method generates a pay out pattern with each claim. 

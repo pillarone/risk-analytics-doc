@@ -1,0 +1,126 @@
+\chapter{Testing Business Logic}
+\label{chap:devguide-testing}
+
+\section{Purposes and forms of Testing}
+In order to avoid changes breaking existing code different kinds of tests are required to provide an immediate feedback to the developer. According to our code contribution process all tests have to be executed before changes are committed into the source code repository. Furthermore the webapplication hudson will execute all test cases again and provide feedback to the committer if any test has failed.
+
+Two different kinds of tests of business logic which we utilize are:
+\begin{itemize}\tightitemize{0pt}
+	\item unit tests, for testing single components, strategies, packets or wiring; and
+	\item integration tests, to check that model simulations run consistently and 
+		completely\footnote{this implicitly includes regression tests, so that old 
+		parametrization files will still run in newer \RA{} releases}.
+\end{itemize}
+
+\section{Unit Tests}
+\begin{itemize}
+	\item Directory structure: Each source class should be accompanied by a corresponding unit 
+		test class with a parallel classpath \eg, test class 
+		
+		\code{ClaimsAggregatorTests} in 
+		\code{test/unit/org.pillarone.riskanalytics.domain.pc.aggregators} 
+		
+		tests source class
+		
+		\code{ClaimsAggregator} in 
+		\code{src/groovy/org.pillarone.riskanalytics.domain.pc.aggregators}.
+		
+	\item Directory structure: A unit test has to be placed in the corresponding package to the source class, \eg \code{ClaimsAggregatorTests} has to be placed in \code{test/unit/org.pillarone.riskanalytics.domain.pc.aggregators} as \code{ClaimsAggregator} is placed in \code{src/groovy/org.pillarone.riskanalytics.domain.pc.aggregators}.
+	\item Each unit test class is written in Groovy, has to end with \code{*Tests} in order to be found by the Grails test framework and be derived from \code{GroovyTestCase}.
+	\item Test cases are a mean to document the usage of a component, therefore every test class should include a method \code{testUsage()} as documentation of the basic usage of a component.
+	\item If business logic calculations is done with doubles or floats, results won't match completly. Therefore it is possible to define an $\epsilon$.
+	
+	\code{assertEquals 'message', 4, component.testFigure, 1E-8}
+	\item If a component contains code throwing exceptions, it's necessary to test if this failures really occure. The syntax is as follows:
+	
+		\code{shouldFail IllegalArgumentException, \{ component.doCalculation() \}}
+		
+	The first argument of shouldFail is the expected exception, the second contains a \GroovyClosure{} with the code to be executed in order to get the exception.
+	
+	TODO: code snippet throwing the same exception type in several blocks: how to make sure exception was thrown where expected? Evaluating exception message?
+	\item If objects are used in several test methods it is recommended to create them in static methods. Example from \code{org.pillarone.riskanalytics.domain.pc.reinsurance.contracts}
+\begin{lstlisting}[label=lst:getcontract0]
+static ReinsuranceContract getContract0() {
+    return new ReinsuranceContract(
+        parmContractStrategy: ReinsuranceContractStrategyFactory.getContractStrategy(
+            ReinsuranceContractType.QUOTASHARE, 
+            ["quotaShare": 0.5, 
+             "commission": 0.0, 
+             "coveredByReinsurer": 1d]))
+}
+\end{lstlisting}
+  This contract can then be used in any other test class. Add parameters to the static functions to get a more flexible usability. Be aware that a new object should be created in every call of the static method to avoid side effects between tests.
+  \item When testing several components it won't be sufficient to call \code{doCalculation()} of the first component as this won't trigger following components. Instead \code{start()} has to be called. This method includes publishing of results to following components. Unfortunately it includes the clearing of the out channel lists too. Inspecting out channels for results won't work in this case. Therefore the \code{TestProbe} concept was introduced. It is a probe that can be connected to any out channel and will collect published content, making it available after \code{start()} has been executed. Another scenario for using \code{TestProbe} is to immitate an out channel to be wired in order to trigger calculations. Whenever a \code{TestProbe} is connected to an out channel \code{isSenderWired()} will return \code{true}. Example: \code{def inChannelWired = new TestPretendInChannelWired(claimsGenerator, "inEventSeverities")}
+  Examples:
+  
+  Use \code{def probeGross = new TestProbe(aggregator, "outUnderwritingInfoGross")} to pretend an out channel is wired and
+  
+  \code{List quotaShareNet = new TestProbe(quotaShare, "outUncoveredClaims").result} to collect outcome from \code{quotaShare.outUncoveredClaims}. Details about the differences of \code{doCalculation()}, \code{execute()} and \code{start()} can be examined in the source code of \code{org.pillarone.riskanalytics.core.components.Component}.
+  \item In order to pretend an in channel to be wired \code{TestPretendInChannelWired} has to be used. If an in channel of a component is wired to such a component \code{isReceiverWired()} will be true.
+  \item Whenever a \code{ComposedComponent} is tested \code{internalWiring()} has to be called before \code{start()} is executed. Omitting \code{internalWiring()} will result in an execution of the first component within a composed component only.
+\end{itemize}
+ 
+\section{Model Tests}
+
+Model tests run a simulation on a specified model and optionally check its output.
+The \ixclass{ModelTest} class and associated framework code provide a simple yet 
+extensible way to test that simulations run completely (without runtime errors) 
+and consistently (reproducibly) across release versions.
+
+Like simulations, model tests take as input a model, a parametrization, and a result 
+template. The first element, the model (class name), is required; the latter two, 
+parametrization and result template (names) have defaults if they are not given 
+explicitly. Additional options specify 
+\begin{itemize}\tightitemize{0pt}
+	\item how many iterations to run (default: 10),
+	\item whether the model test should compare the results collected (default: no),
+		\todo{and if so, where the reference data can be found (default naming convention applies)}{verify this statement!}
+	\item whether the results should be saved to a file or a database (default: file), and 
+	\item the test result's display name and \todo{filename}{or database tablename?}.
+\end{itemize}
+
+When collected, the model simulation result consists of tuples of \str{(iteration, 
+period, path, field, value)}. When saved to a file, each tuple appears on one line
+of a so-called tab-delimited text file with extension \filename{.tsl}.
+\todo{}{Where and when is the output directory specified or configured (\eg at run or compile time)?}
+The result template defines which values -- \ie, which \str{(path, field)} 
+combinations -- to collect.
+
+The driver for each model test is a Groovy class extending \ixclass{ModelTest}.
+Each \str{ModelTest} subclass implements a method, \ixmeth{getModelClass}, to tell 
+the framework which model (class) it is testing. Likewise, the method 
+\ixmeth{shouldCompareResults}, wich returns a \str{boolean} value\footnote{
+\str{true} or \str{false}}, tells the framework whether to collect the results
+defined in the result template. These are the required \ixclass{ModelTest} elements.
+
+This forces the model testing framework to instantiate the model at runtime, and then run 
+a simulation on it using the assigned parameters and result template.
+If the option to save the results to a file was selected, the results are written to 
+a file in the directory \filename{}.
+If the option to compare results was selected, the results are compared with those 
+in a file of the same format, which must be given in the directory \filename{}. 
+Any differences result in the test failing. If there are no runtime errors and no 
+differences between the reference result set and the test's result set, the test passes.
+
+Through this mechanism, one can adopt the following methodology to initially verify 
+specific aspects of a model, and subsequently enforce the same behavior, saving
+the specification as an artifact \footnote{more precisely, a regression test. These
+codify and guarantee application behavior, acting as a measurestick/safeguard/constraint 
+to protect against unintended side-effects or incompatible interpretations 
+resulting from future code development efforts. This helps not only to fulfill the 
+enterprise-level goals of transparency and standards compliance, but also to efficiently
+expend development efforts while reaching them.} in \RA.
+\begin{enumerate}\tightitemize{0pt}
+	\item Generate specific parametrizations and result templates for a model, 
+	      targeting specific behavior.
+	\item Run the corresponding model test, saving a result file with no comparison.
+	\item Inspect and verify the results (once; iterating to this point until correct).
+	\item Copy the result file into \filename{\RA{}PC/test/data/}.
+	\item Change the test class option to subsequently require comparison,
+	      using the copied file from the previous step as the reference result.
+\end{enumerate}
+
+The model test class \ixclass{AggregateDrillDownCollectingModeStrategyTests} 
+illustrates many of the points mentioned above.
+
+\todo{This section is not yet finished!}{check veracity of and expand/expound on these statements! \eg, AggregateDrillDownCollectingModeStrategyTests}
