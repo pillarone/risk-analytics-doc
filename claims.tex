@@ -69,7 +69,7 @@ Having a look at a simulation from the other end, you will find the following co
 
 Depending on the application, a Claims Model \term{Type} from Table~\ref{tab:ClaimsModelType} can be selected. The Claims Model Type defines the form of the claims model; the names and structure of subordinate parameters depend on it. The default value \term{None} provides an empty Claims Generator, producing no claims. \\ The intent of the \term{none} type is to easily toggle a claims generator on or off, e.g.~in case you want to use it in the first period but not in the second period of a multi-period model. 
 
-\begin{table}[htbp]
+\begin{sidewaystable}[htbp]
 	\centering
 		\begin{tabular}{lll}
 			\textbf{Claims Model Type} & (Additional) \textbf{Input Fields} & \textbf{Example} \\
@@ -88,7 +88,7 @@ Depending on the application, a Claims Model \term{Type} from Table~\ref{tab:Cla
 		\end{tabular}
 	\caption{Claims Model Types}
 	\label{tab:ClaimsModelType}
-\end{table}
+\end{sidewaystable}
 
 \subsubsection*{None}
 
@@ -131,17 +131,17 @@ A very flexible claims generator is made available through this option: In addit
 
 \subsubsection*{Frequency Severity with Date}
 
-In addition to the already explained claims model \term{Frequency Severity} the hereby explained model allows the modelling of assumptions around the occurence of the claims. As default, a uniform$(0;1)$ distribution is applied, resulting in equally distributed claims over the complete time period. Alternatively, for example, Piecewise Linear$((0;0.25;0.5;1);(0;0.33;0.66;1))$ would result in an occurence pattern with no occurences from January to March, $33/100$ of claims occuring between April and June, another $33/100$ between July and December and the remaining $34/100$ on the latest day of the (standardized) year. Again, this is important to know namely for reinsurance contracts incepting during the period and therefore not covering the whole period as being modelled.
+In addition to the already explained claims model \term{Frequency Severity} the hereby explained model allows the modelling of assumptions around the occurence of the claims. As default, a uniform$(0;1)$ distribution is applied, resulting in equally distributed claims over the complete time period. Alternatively, for example, \\ Piecewise Linear$((0;0.25;0.5;1);(0;0.33;0.66;1))$ would result in an occurence pattern with no occurences from January to March, $33/100$ of claims occuring between April and June, another $33/100$ between July and December and the remaining $34/100$ on the latest day of the (standardized) year. Again, this is important to know namely for reinsurance contracts incepting during the period and therefore not covering the whole period as being modelled.
 
 \subsubsection*{Severity of Event Generator}
 \label{sec:ExternalSeverity}
 
 Severity of event generator is selected in case you want to first simulate severities by use of the \term{Event Generator} (\cf~the section on \term{Event Generators} on page~\pageref{sec:eventgenerator} for more details) and afterwards apply them to -- usually -- several underwriting segments: By using this approch, the \term{Event Generator} (\cf~Section~\ref{sec:eventgenerator}) will firstly draw one or several event as specified in your parameterization whereof a percentile is drawn. This percentile then gets applied to the \term{Claims Distribution} here.
 
-\begin{table}[p]
+\begin{sidewaystable}[p]
     \centering
         \begin{tabular}{|l|p{11 cm}|}
-          \multicolumn{2}{c}{This is a summary of names and entries for comboboxes as related to claims generators.} \\
+          \multicolumn{2}{c}{This is a summary of names and entries for comboboxes as related to claims generators. Part I/II} \\
             \hline
             \textbf{Name}, Combobox&\textbf{Description} \\
             \hline
@@ -159,6 +159,18 @@ Severity of event generator is selected in case you want to first simulate sever
             Number of Policies & or by the number of policies.\\
             \hline
             \textbf{Frequency Distribution} & \textbf{Please refer to the \href{http://www.iro.umontreal.ca/~simardr/ssj/indexe.html}{SSJ Library}} \\
+            \hline
+            \end{tabular}
+    \caption{Claims Model: Summary and Explanations of Comboboxes Part I/II}
+    \label{tab:ClaimsModelTypeDetail}
+\end{sidewaystable}
+
+\begin{sidewaystable}[p]
+    \centering
+        \begin{tabular}{|l|p{11 cm}|}
+          \multicolumn{2}{c}{This is a summary of names and entries for comboboxes as related to claims generators. Part II/II} \\
+            \hline
+            \textbf{Name}, Combobox&\textbf{Description} \\
             \hline
             \textbf{Frequency Modification}& \textbf{Applying a modification to the claims generator \textit{before} multiplying with the Frequency Base}\\
             None & No modification to the selected frequency distribution. \\
@@ -180,9 +192,10 @@ Severity of event generator is selected in case you want to first simulate sever
             \textbf{Claims Modification}& \textbf{\cf~above \textit{Frequency Modification}}\\
             \hline
             \end{tabular}
-    \caption{Claims Model: Summary and Explanations of Comboboxes}
-    \label{tab:ClaimsModelTypeDetail}
-\end{table}
+    \caption{Claims Model: Summary and Explanations of Comboboxes Part II/II}
+\end{sidewaystable}
+
+
 
 \subsection{Exposure Information Associaton} 
 \label{subsec:Exposure Information Associaton}
