@@ -1,0 +1,28 @@
+\chapter[General Insurance Cashflow Model \GIRA]{A partial internal model for one or multiple legal entities: \GIRA}
+\label{chap:gira}
+
+\section{Usage hints}
+\paragraph{Global parameters}
+\begin{itemize}
+	\item Projection default is Complete Roll-out meaning that claims occurring in the first projection period are fully developed. So the number of projection periods corresponds to the longest applied pattern. This is necessary in order to get correct net present values. If no net present values are calculated it is also possible to specify a fixed number of periods by selecting the periods option.
+	\item Run-off after first periods means that only in the first period new claims can occur. Following periods will contain only claim updates but no new claims.
+\end{itemize}
+
+\paragraph{Minimal parameterization}
+By creating a new parameterization of the \GIRA{} model one gets a model template. A valid parameterization could consist of i.e. one claims generator and reinsurance contract only. For simulation runtime performance it makes sense to avoid any additional parameters providing no further insights. Adding one segment or legal entity only makes no sense as the same results would be available in the reinsurance program results. However adding segments makes sense in order to group the business of a legal entity, modelling market shares and it is required as soon as discounting of results becomes an issue, as yield curves can be selected per segment. Legal entities are required for group modelling or inward business. As long as a single company is modelled without considering the default risk it is not necessary to define any legal entity. 
+
+\paragraph{Indices}
+Severity indices don't have any effect on the generated ultimate values as they are applied on the outstanding value only. So, severity indices have a run-off effect only. In order to modify the ultimate it is necessary to calibrate the severity distributions relative to the number of policies or premium written. Both of this base sizes can be modified either with a policy or premium index. 
+
+\paragraph{Reinsurance contracts}
+The parameter reinsurers can be used for the following purposes
+\begin{itemize}
+\item proportionally reducing the cover of a contract if it was not placed a 100%
+\item defining the signed share for different reinsurers. This provides the possibilities to define following contracts on inward business and modelling the default of different counter parties
+\end{itemize}
+If the parameter is left void a 100% of the contract is placed.
+
+As GIRA is a multi period model it's possible to define to reinsurance cover for different time slots. The default is covering all claims occurring in the first projection period. Using the custom option one can define any period by using dates.
+
+\paragraph{Order of entering parameters}
+It is recommended to fill in parameters from top to bottom as components further down are referencing preceeding components. If one specifies first all claims generators and afterwards payout patterns all claims generators will link automatically to the first specified payout pattern which is probably not the desired behaviour. By following the order of tree this can be avoided.
