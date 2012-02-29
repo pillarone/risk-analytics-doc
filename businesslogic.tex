@@ -10,11 +10,11 @@ The following examples can all be found within in the \RA{} source code reposito
 We create a component providing a premium value to other components. The premium will be the product of number of policies and the price per policy parameter.
 
 \begin{itemize}
-  \item Create a new Groovy or Java class in the corresponding package. (Line 1, 6) Domain classes can be found in \code{src/groovy/org.pillarone.riskanalytics.domain}
+  \item Create a new Groovy or Java class in the corresponding package. (Line 1, 6) \\ Domain classes can be found in \code{src/groovy/org.pillarone.riskanalytics.domain}
   \item The class has to extend \code{org.pillarone.riskanalytics.core.components.Component} (Line 6)
   \item The class has two parameters \code{parmNumberOfPolicy} and \code{parmPricePerPolicy} (Line 8, 9) The order in which the parameters are defined is also the order how they will be displayed in the UI. If parameters are inherited from superclasses, the parameters of the superclass are displayed first.
   \item The class has an output channel \code{outPremium} (Line 11) in order to send premium information to other components.
-  \item Premium has to be calculated (Line 14), wrapped in a packet and added to the output channel (Line 15). Once \code{doCalculation()} has finished, the framework will send this premium packet to following components being wired to \code{PremiumCalculation.outPremium}.
+  \item Premium has to be calculated (Line 14), wrapped in a packet and added to the output channel (Line 15). Once \code{doCalculation()} has finished, the framework will send this premium packet to following .nents being wired to \code{PremiumCalculation.outPremium}.
 \end{itemize}
 
 \begin{lstlisting}[label=lst:premcalc]
@@ -89,7 +89,7 @@ class PremiumPacket extends SingleValuePacket {
 We create a component composed of a frequency and claims size generator.
 
 \begin{itemize}
-  \item Create a new Groovy class in the corresponding package (Line 1, 2). Domain classes can be found in \code{src/groovy/org.pillarone.riskanalytics.domain}
+  \item Create a new Groovy class in the corresponding package (Line 1, 2). \\ Domain classes can be found in \code{src/groovy/org.pillarone.riskanalytics.domain}
     \\ \caveat{Composed components have to be defined in a Groovy class, as wiring would not work with a Java class in the current implementation.}
   \item The class has to extend (see Line 9):
     \\ \code{org.pillarone.riskanalytics.core.components.ComposedComponent}

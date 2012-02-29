@@ -44,7 +44,9 @@ grant file on *.* to 'p1rat'@'localhost';
 }
 
 This would be sufficient to use \RA{} with a standalone mysql, however for acceptable performance a script which will setup partitioning and indices should be executed.
-It can be downloaded at https://svn.intuitive-collaboration.com/RiskAnalytics/trunk/RiskAnalytics/src/java/mysql.sql
+It can be downloaded at https://svn.intuitive-collaboration.com/RiskAnalytics/trunk/
+\\% linebrake needed
+RiskAnalytics/src/java/mysql.sql
 
 The database is now ready for Risk Analytics. To use this database with Risk Analytics it is necessary to edit the start script RunRiskAnalyticsMySql.cmd
 and replace \texttt{-Dgrails.env=mysqlembedded} with \texttt{-Dgrails.env=mysql}
